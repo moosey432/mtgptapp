@@ -1,0 +1,7 @@
+body { margin: 0; font-family: Arial; background:#111; color:#eee }
+.app { max-width: 980px; margin: 0 auto; padding: 16px }
+.tabs button, button { margin: 4px; background:#333; color:#fff; border:1px solid #666; padding:8px 10px; border-radius:6px }
+section { background:#1b1b1b; padding:14px; border-radius:10px; margin-top:12px }
+input, select { display:block; margin:8px 0; padding:8px; background:#222; color:#fff; border:1px solid #555 }
+.chain { padding:8px; background:#202733; border:1px solid #445; margin:10px 0 }
+.pedal { padding:6px; border:1px solid #444; margin:6px 0; border-radius:8px }
