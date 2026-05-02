@@ -43,6 +43,7 @@ const normalizeTone = (incoming) => {
           const type = p?.type || 'overdrive'
           return { ...mkPedal(type), ...p, type, settings: { ...(defaultPedalSettings[type] || {}), ...(p?.settings || {}) } }
         })
+      ? incoming.pedals.map((p) => ({ ...mkPedal(p.type || 'overdrive'), ...p, settings: { ...defaultPedalSettings[p.type], ...p.settings } }))
       : base.pedals,
   }
 }
@@ -71,6 +72,12 @@ export default function App() {
 
   const tabs = ['Gear Profile', 'Tone Builder', 'Presets', 'Test Audio']
   const amp = useMemo(() => gearCatalog.amps.find((a) => a.id === tone.amp) || gearCatalog.amps[0], [tone.amp])
+
+  useEffect(() => {
+    localStorage.setItem('currentTone', JSON.stringify(tone))
+  }, [tone])
+  const tabs = ['Gear Profile', 'Tone Builder', 'Presets', 'Test Audio']
+  const amp = useMemo(() => gearCatalog.amps.find((a) => a.id === tone.amp), [tone.amp])
 
   useEffect(() => {
     localStorage.setItem('currentTone', JSON.stringify(tone))
@@ -151,12 +158,14 @@ export default function App() {
             {tone.pedals.map((p, i) => (
               <div key={p.id} className="pedal">
                 <div className="pedal-head"><b>{p.type}</b><label><input type="checkbox" checked={Boolean(p?.settings?.enabled)} onChange={(e) => updatePedalSetting(p.id, 'enabled', e.target.checked)} /> On</label></div>
+                <div className="pedal-head"><b>{p.type}</b><label><input type="checkbox" checked={p.settings.enabled} onChange={(e) => updatePedalSetting(p.id, 'enabled', e.target.checked)} /> On</label></div>
                 <div className="row">
                   <button onClick={() => i > 0 && setTone({ ...tone, pedals: reorder(tone.pedals, i, i - 1) })}>↑</button>
                   <button onClick={() => i < tone.pedals.length - 1 && setTone({ ...tone, pedals: reorder(tone.pedals, i, i + 1) })}>↓</button>
                 </div>
                 <div className="knobs">
                   {Object.entries(p?.settings || {}).filter(([k]) => k !== 'enabled').map(([k, v]) => knob(k, v, (value) => updatePedalSetting(p.id, k, value)))}
+                  {Object.entries(p.settings).filter(([k]) => k !== 'enabled').map(([k, v]) => knob(k, v, (value) => updatePedalSetting(p.id, k, value)))}
                 </div>
               </div>
             ))}

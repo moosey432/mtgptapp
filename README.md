@@ -47,3 +47,10 @@ npm run dev
 ### If you see a blank/white screen
 - Open DevTools and clear localStorage for the app origin, then refresh.
 - This build now guards against malformed saved tones/pedals, but old invalid local data can still be removed with a reset.
+
+## Project structure
+- `src/data/gearCatalog.js`
+- `src/audio/audioEngine.js`
+- `src/utils/toneAdapter.js`
+- `src/components/SignalChain.jsx`
+- `src/App.jsx`
