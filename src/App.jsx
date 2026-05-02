@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { defaultPedalSettings, gearCatalog, presets } from './data/gearCatalog'
 import { adaptToneToProfile } from './utils/toneAdapter'
 import { playTestTone, startMicInput, stopAudio } from './audio/audioEngine'
@@ -13,6 +13,8 @@ const safeParse = (key, fallback) => {
   }
 }
 
+const clamp = (n) => Math.min(1, Math.max(0, Number(n)))
+
 const mkPedal = (type) => ({
   id: `${type}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
   type,
@@ -20,6 +22,7 @@ const mkPedal = (type) => ({
 })
 
 const makeDefaultTone = () => ({
+  name: 'Current Tone',
   guitar: gearCatalog.guitars[0].id,
   amp: gearCatalog.amps[0].id,
   cab: gearCatalog.cabinets[0].id,
@@ -36,7 +39,7 @@ const normalizeTone = (incoming) => {
     ...incoming,
     ampSettings: { ...base.ampSettings, ...(incoming.ampSettings || {}) },
     pedals: Array.isArray(incoming.pedals)
-      ? incoming.pedals.map((p) => ({ ...mkPedal(p.type || 'overdrive'), ...p }))
+      ? incoming.pedals.map((p) => ({ ...mkPedal(p.type || 'overdrive'), ...p, settings: { ...defaultPedalSettings[p.type], ...p.settings } }))
       : base.pedals,
   }
 }
@@ -48,20 +51,32 @@ const reorder = (list, from, to) => {
   return copy
 }
 
+const knob = (label, value, onChange) => (
+  <label className="knob" key={label}>
+    <span>{label}</span>
+    <input type="range" min="0" max="1" step="0.01" value={value ?? 0} onChange={(e) => onChange(clamp(e.target.value))} />
+    <small>{Number(value ?? 0).toFixed(2)}</small>
+  </label>
+)
+
 export default function App() {
-  const [tab, setTab] = useState('builder')
-  const [profile, setProfile] = useState(() => safeParse('gearProfile', {}))
+  const [tab, setTab] = useState('Tone Builder')
+  const [profile, setProfile] = useState(() => safeParse('gearProfile', { pickupType: 'single coil' }))
   const [tone, setTone] = useState(() => normalizeTone(safeParse('currentTone', null)))
   const [notes, setNotes] = useState([])
   const [savedTones, setSavedTones] = useState(() => safeParse('savedTones', []))
 
+  const tabs = ['Gear Profile', 'Tone Builder', 'Presets', 'Test Audio']
   const amp = useMemo(() => gearCatalog.amps.find((a) => a.id === tone.amp), [tone.amp])
+
+  useEffect(() => {
+    localStorage.setItem('currentTone', JSON.stringify(tone))
+  }, [tone])
 
   const saveProfile = () => localStorage.setItem('gearProfile', JSON.stringify(profile))
 
   const saveTone = () => {
-    localStorage.setItem('currentTone', JSON.stringify(tone))
-    const next = [...savedTones, { name: `Tone ${savedTones.length + 1}`, tone }]
+    const next = [...savedTones, { name: profile.favoriteToneName || `Tone ${savedTones.length + 1}`, tone }]
     setSavedTones(next)
     localStorage.setItem('savedTones', JSON.stringify(next))
   }
@@ -70,10 +85,19 @@ export default function App() {
     const nextAmp = gearCatalog.amps.find((a) => a.id === preset.amp) || gearCatalog.amps[0]
     setTone((current) => ({
       ...current,
+      name: preset.name,
       amp: preset.amp,
       cab: preset.cab,
       ampSettings: { ...nextAmp },
       pedals: preset.pedals.map(mkPedal),
+    }))
+    setTab('Tone Builder')
+  }
+
+  const updatePedalSetting = (id, key, value) => {
+    setTone((current) => ({
+      ...current,
+      pedals: current.pedals.map((p) => (p.id === id ? { ...p, settings: { ...p.settings, [key]: value } } : p)),
     }))
   }
 
@@ -87,26 +111,25 @@ export default function App() {
     <div className="app">
       <h1>Tone Forge MVP</h1>
       <div className="tabs">
-        {['profile', 'builder', 'presets', 'audio'].map((t) => (
-          <button key={t} onClick={() => setTab(t)}>{t}</button>
+        {tabs.map((t) => (
+          <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>{t}</button>
         ))}
       </div>
 
-      {tab === 'profile' && (
+      {tab === 'Gear Profile' && (
         <section>
-          <h2>Gear Profile</h2>
-          {['guitarType', 'ownedAmp', 'ownedPedals', 'audioInputChoice'].map((k) => (
+          <h2>Gear Profile Setup</h2>
+          {['guitarType', 'ownedAmp', 'ownedPedals', 'audioInputChoice', 'favoriteToneName'].map((k) => (
             <input key={k} placeholder={k} value={profile[k] || ''} onChange={(e) => setProfile({ ...profile, [k]: e.target.value })} />
           ))}
           <select value={profile.pickupType || ''} onChange={(e) => setProfile({ ...profile, pickupType: e.target.value })}>
-            <option value="">Pickup Type</option>
-            {gearCatalog.pickups.map((p) => <option key={p}>{p}</option>)}
+            {gearCatalog.pickups.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
           <button onClick={saveProfile}>Save Profile</button>
         </section>
       )}
 
-      {tab === 'builder' && (
+      {tab === 'Tone Builder' && (
         <section>
           <h2>Tone Builder</h2>
           <select value={tone.guitar} onChange={(e) => setTone({ ...tone, guitar: e.target.value })}>
@@ -120,13 +143,17 @@ export default function App() {
           </select>
 
           <SignalChain pedals={tone.pedals} />
-
-          <div>
+          <div className="pedal-grid">
             {tone.pedals.map((p, i) => (
               <div key={p.id} className="pedal">
-                <b>{p.type}</b>
-                <button onClick={() => i > 0 && setTone({ ...tone, pedals: reorder(tone.pedals, i, i - 1) })}>↑</button>
-                <button onClick={() => i < tone.pedals.length - 1 && setTone({ ...tone, pedals: reorder(tone.pedals, i, i + 1) })}>↓</button>
+                <div className="pedal-head"><b>{p.type}</b><label><input type="checkbox" checked={p.settings.enabled} onChange={(e) => updatePedalSetting(p.id, 'enabled', e.target.checked)} /> On</label></div>
+                <div className="row">
+                  <button onClick={() => i > 0 && setTone({ ...tone, pedals: reorder(tone.pedals, i, i - 1) })}>↑</button>
+                  <button onClick={() => i < tone.pedals.length - 1 && setTone({ ...tone, pedals: reorder(tone.pedals, i, i + 1) })}>↓</button>
+                </div>
+                <div className="knobs">
+                  {Object.entries(p.settings).filter(([k]) => k !== 'enabled').map(([k, v]) => knob(k, v, (value) => updatePedalSetting(p.id, k, value)))}
+                </div>
               </div>
             ))}
           </div>
@@ -136,11 +163,9 @@ export default function App() {
             {gearCatalog.pedalTypes.map((p) => <option key={p}>{p}</option>)}
           </select>
 
-          <div>
-            <label>
-              Gain
-              <input type="range" min="0" max="1" step="0.01" value={tone.ampSettings.gain} onChange={(e) => setTone({ ...tone, ampSettings: { ...tone.ampSettings, gain: Number(e.target.value) } })} />
-            </label>
+          <h3>Amp Controls</h3>
+          <div className="knobs">
+            {['gain', 'bass', 'mids', 'treble'].map((k) => knob(k, tone.ampSettings[k], (value) => setTone({ ...tone, ampSettings: { ...tone.ampSettings, [k]: value } })))}
           </div>
 
           <button onClick={adapt}>Adapt Tone To My Gear</button>
@@ -149,14 +174,14 @@ export default function App() {
         </section>
       )}
 
-      {tab === 'presets' && (
+      {tab === 'Presets' && (
         <section>
           <h2>Presets</h2>
-          {presets.map((p) => <button key={p.name} onClick={() => applyPreset(p)}>{p.name}</button>)}
+          <div className="preset-grid">{presets.map((p) => <button key={p.name} onClick={() => applyPreset(p)}>{p.name}</button>)}</div>
         </section>
       )}
 
-      {tab === 'audio' && (
+      {tab === 'Test Audio' && (
         <section>
           <h2>Test Audio</h2>
           <p>Current amp: {amp?.name}</p>
@@ -164,7 +189,7 @@ export default function App() {
           <button onClick={() => startMicInput(tone)}>Start Mic Input</button>
           <button onClick={stopAudio}>Stop Audio</button>
           <h3>Load Saved Tone</h3>
-          {savedTones.map((s, idx) => <button key={idx} onClick={() => setTone(normalizeTone(s.tone))}>{s.name}</button>)}
+          {savedTones.map((s, idx) => <button key={`${s.name}-${idx}`} onClick={() => setTone(normalizeTone(s.tone))}>{s.name}</button>)}
         </section>
       )}
     </div>
