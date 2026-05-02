@@ -13,3 +13,5 @@ input, select { display:block; margin:8px 0; padding:8px; background:#222; color
 .knob span { text-transform:capitalize; font-size:12px }
 .preset-grid { display:flex; flex-wrap:wrap; gap:8px }
 .row button { margin-right:6px }
+
+.tag { color:#bfc9ff; margin: 0 0 10px 0; }

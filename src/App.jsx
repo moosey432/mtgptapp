@@ -18,7 +18,7 @@ const clamp = (n) => Math.min(1, Math.max(0, Number(n)))
 const mkPedal = (type) => ({
   id: `${type}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
   type,
-  settings: { ...defaultPedalSettings[type] },
+  settings: { ...(defaultPedalSettings[type] || { enabled: true }) },
 })
 
 const makeDefaultTone = () => ({
@@ -39,6 +39,10 @@ const normalizeTone = (incoming) => {
     ...incoming,
     ampSettings: { ...base.ampSettings, ...(incoming.ampSettings || {}) },
     pedals: Array.isArray(incoming.pedals)
+      ? incoming.pedals.map((p) => {
+          const type = p?.type || 'overdrive'
+          return { ...mkPedal(type), ...p, type, settings: { ...(defaultPedalSettings[type] || {}), ...(p?.settings || {}) } }
+        })
       ? incoming.pedals.map((p) => ({ ...mkPedal(p.type || 'overdrive'), ...p, settings: { ...defaultPedalSettings[p.type], ...p.settings } }))
       : base.pedals,
   }
@@ -64,8 +68,14 @@ export default function App() {
   const [profile, setProfile] = useState(() => safeParse('gearProfile', { pickupType: 'single coil' }))
   const [tone, setTone] = useState(() => normalizeTone(safeParse('currentTone', null)))
   const [notes, setNotes] = useState([])
-  const [savedTones, setSavedTones] = useState(() => safeParse('savedTones', []))
+  const [savedTones, setSavedTones] = useState(() => Array.isArray(safeParse('savedTones', [])) ? safeParse('savedTones', []) : [])
 
+  const tabs = ['Gear Profile', 'Tone Builder', 'Presets', 'Test Audio']
+  const amp = useMemo(() => gearCatalog.amps.find((a) => a.id === tone.amp) || gearCatalog.amps[0], [tone.amp])
+
+  useEffect(() => {
+    localStorage.setItem('currentTone', JSON.stringify(tone))
+  }, [tone])
   const tabs = ['Gear Profile', 'Tone Builder', 'Presets', 'Test Audio']
   const amp = useMemo(() => gearCatalog.amps.find((a) => a.id === tone.amp), [tone.amp])
 
@@ -109,6 +119,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <p className="tag">Build tones with amps, cabs, and pedal chains. Test with synth guitar tone or mic input.</p>
       <h1>Tone Forge MVP</h1>
       <div className="tabs">
         {tabs.map((t) => (
@@ -146,12 +157,14 @@ export default function App() {
           <div className="pedal-grid">
             {tone.pedals.map((p, i) => (
               <div key={p.id} className="pedal">
+                <div className="pedal-head"><b>{p.type}</b><label><input type="checkbox" checked={Boolean(p?.settings?.enabled)} onChange={(e) => updatePedalSetting(p.id, 'enabled', e.target.checked)} /> On</label></div>
                 <div className="pedal-head"><b>{p.type}</b><label><input type="checkbox" checked={p.settings.enabled} onChange={(e) => updatePedalSetting(p.id, 'enabled', e.target.checked)} /> On</label></div>
                 <div className="row">
                   <button onClick={() => i > 0 && setTone({ ...tone, pedals: reorder(tone.pedals, i, i - 1) })}>↑</button>
                   <button onClick={() => i < tone.pedals.length - 1 && setTone({ ...tone, pedals: reorder(tone.pedals, i, i + 1) })}>↓</button>
                 </div>
                 <div className="knobs">
+                  {Object.entries(p?.settings || {}).filter(([k]) => k !== 'enabled').map(([k, v]) => knob(k, v, (value) => updatePedalSetting(p.id, k, value)))}
                   {Object.entries(p.settings).filter(([k]) => k !== 'enabled').map(([k, v]) => knob(k, v, (value) => updatePedalSetting(p.id, k, value)))}
                 </div>
               </div>
