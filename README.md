@@ -1,29 +1,45 @@
-# Tone Forge MVP
+# Tone Forge MVP (React + Vite)
 
-A testable React + Vite guitar tone builder app with a data-driven gear catalog and browser audio chain.
+A testable guitar tone builder MVP that is **data-driven** and avoids real trademarked gear names.
 
-## Setup
+## Run locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Features
-- Gear profile setup saved to localStorage.
-- Tone builder with guitar/amp/cab selection and reorderable pedal chain.
-- Presets for common tones.
-- Web Audio test tone generator and optional microphone input.
-- Tone adaptation from profile (pickup/amp-aware suggestions).
-- Save/load tones with localStorage.
+## Main tabs
+- **Gear Profile**: Save your guitar/pickup/amp/pedal profile in `localStorage`.
+- **Tone Builder**: Choose guitar, amp, cab, reorder pedals, and tweak knob settings.
+- **Presets**: Load starter tones.
+- **Test Audio**: Test synthetic guitar tone and optional microphone/guitar-interface input.
 
-## Real audio processing vs placeholders
-### Real processing
+## Core MVP behaviors
+- Data-driven gear catalog in `src/data/gearCatalog.js`.
+- Tone adaptation logic in `src/utils/toneAdapter.js`.
+- Web Audio chain builder in `src/audio/audioEngine.js`.
+- Saved tones and current tone state persisted to `localStorage`.
+
+## Real audio processing in this MVP
 - Oscillator-based guitar-like test signal.
-- Chainable gain, waveshaper distortion, filter EQ/wah, compressor, delay network, and simple gate.
-- Live microphone input (`getUserMedia`) through the selected chain.
+- Pedal/amp chain with:
+  - gain staging
+  - waveshaper distortion
+  - filter-based EQ/wah approximation
+  - compressor
+  - feedback delay network
+  - simplified noise gate
+- Live microphone input with `getUserMedia` routed through selected chain.
 
-### Placeholder/simplified behavior
-- Cab simulation is visual only (no IR loader yet).
-- Reverb is a delay-network approximation (not studio convolution IRs).
-- Some pedals share simplified implementations.
+## Placeholder/simplified pieces
+- Cabinet selection is currently visual/organizational only (no impulse response cabinet IR loading yet).
+- Reverb is simplified via delay-network behavior (not studio IR convolution).
+- Modulation effects (chorus/phaser/flanger) are simplified and share a core delay/modulation approach.
+
+## Project structure
+- `src/data/gearCatalog.js`
+- `src/audio/audioEngine.js`
+- `src/utils/toneAdapter.js`
+- `src/components/SignalChain.jsx`
+- `src/App.jsx`
