@@ -6,6 +6,7 @@ React + Vite guitar tone-building MVP (frontend only) with Web Audio API and loc
 This project is a **Vite app**. If you double-click `index.html` (using `file://`), the app can show a white screen because browser module loading differs from a dev server.
 
 Use the app this way:
+## Install and run
 
 ```bash
 npm install
@@ -49,3 +50,7 @@ npm run build
 3. Check missing import/export paths.
 4. Check terminal output from Vite.
 5. Restart dev server (`Ctrl+C`, then `npm run dev`).
+1. Open browser console for runtime errors.
+2. Check missing import/export paths.
+3. Check terminal output from Vite.
+4. Restart dev server (`Ctrl+C`, then `npm run dev`).
