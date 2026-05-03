@@ -1,97 +1,28 @@
-// Web Audio chain builder for a testable guitar-like signal path.
-let context
-let currentNodes = []
-let mediaStream
+let ctx; let active=[]; let mic;
+const ensure=async()=>{if(!ctx) ctx=new window.AudioContext(); if(ctx.state==='suspended') await ctx.resume(); return ctx}
+const clip=(v)=>Math.max(0,Math.min(1,Number(v)||0))
+const distCurve=(amt)=>{const n=2048,c=new Float32Array(n);for(let i=0;i<n;i++){const x=i*2/n-1;c[i]=Math.tanh(x*(1+amt*8))}return c}
 
-const makeDistortionCurve = (amount = 25) => {
-  const n = 44100
-  const curve = new Float32Array(n)
-  for (let i = 0; i < n; i += 1) {
-    const x = (i * 2) / n - 1
-    curve[i] = ((3 + amount) * x * 20 * (Math.PI / 180)) / (Math.PI + amount * Math.abs(x))
-  }
-  return curve
+function buildChain(c,input,tone){
+  const inputGain=c.createGain(); inputGain.gain.value=0.5+clip(tone.inputGain||0.5); input.connect(inputGain); let node=inputGain;
+  const low=c.createBiquadFilter(); low.type='lowshelf'; low.frequency.value=180; low.gain.value=(clip(tone.ampSettings?.bass)-0.5)*18; node.connect(low); node=low;
+  const mid=c.createBiquadFilter(); mid.type='peaking'; mid.frequency.value=800; mid.Q.value=0.8; mid.gain.value=(clip(tone.ampSettings?.mid)-0.5)*18; node.connect(mid); node=mid;
+  const hi=c.createBiquadFilter(); hi.type='highshelf'; hi.frequency.value=2200; hi.gain.value=(clip(tone.ampSettings?.treble)-0.5)*18; node.connect(hi); node=hi;
+  const drive=c.createWaveShaper(); drive.curve=distCurve(clip(tone.ampSettings?.gain)); drive.oversample='2x'; node.connect(drive); node=drive;
+  const comp=c.createDynamicsCompressor(); comp.threshold.value=-30; comp.ratio.value=3; node.connect(comp); node=comp;
+  const delay=c.createDelay(1.2); delay.delayTime.value=0.25; const fb=c.createGain(); fb.gain.value=0.25; delay.connect(fb); fb.connect(delay);
+  const wet=c.createGain();wet.gain.value=0.2; const dry=c.createGain();dry.gain.value=0.85; node.connect(dry); node.connect(delay); delay.connect(wet);
+  const mix=c.createGain(); dry.connect(mix); wet.connect(mix); node=mix;
+  const out=c.createGain(); out.gain.value=clip(tone.ampSettings?.volume||0.7); node.connect(out); out.connect(c.destination);
+  active.push(inputGain,low,mid,hi,drive,comp,delay,fb,wet,dry,mix,out);
 }
 
-const ensureContext = async () => {
-  if (!context) context = new window.AudioContext()
-  if (context.state === 'suspended') await context.resume()
-  return context
+export async function playTestRiff(tone){
+  try{ stopAudio(); const c=await ensure();
+    const bus=c.createGain(); buildChain(c,bus,tone);
+    const notes=[110,146.83,164.81,196,220,196];
+    notes.forEach((f,i)=>{const t=c.currentTime+i*0.25;const o=c.createOscillator();const g=c.createGain();o.type='sawtooth';o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.28,t+0.01);g.gain.exponentialRampToValueAtTime(0.0001,t+0.22);o.connect(g);g.connect(bus);o.start(t);o.stop(t+0.23);active.push(o,g)})
+  }catch(e){throw new Error(`Audio engine failed: ${e.message}`)}
 }
-
-const addPedalNode = (ctx, type, settings, inputNode) => {
-  let out = inputNode
-  if (['overdrive', 'distortion', 'fuzz'].includes(type)) {
-    const shaper = ctx.createWaveShaper()
-    shaper.curve = makeDistortionCurve(15 + settings.drive * 80)
-    inputNode.connect(shaper)
-    out = shaper
-  }
-  if (['eq', 'wah'].includes(type)) {
-    const f = ctx.createBiquadFilter()
-    f.type = type === 'wah' ? 'bandpass' : 'peaking'
-    f.frequency.value = type === 'wah' ? 400 + settings.frequency * 1600 : 850
-    f.gain.value = type === 'wah' ? 0 : (settings.mids - 0.5) * 16
-    inputNode.connect(f)
-    out = f
-  }
-  if (['delay', 'reverb', 'chorus', 'flanger'].includes(type)) {
-    const delay = ctx.createDelay(1.2)
-    const fb = ctx.createGain(); fb.gain.value = settings.feedback ?? 0.25
-    const wet = ctx.createGain(); wet.gain.value = settings.mix ?? 0.3
-    const dry = ctx.createGain(); dry.gain.value = 1 - wet.gain.value
-    inputNode.connect(dry)
-    inputNode.connect(delay); delay.connect(fb); fb.connect(delay); delay.connect(wet)
-    const merger = ctx.createGain(); dry.connect(merger); wet.connect(merger)
-    out = merger
-  }
-  if (type === 'compressor') {
-    const comp = ctx.createDynamicsCompressor()
-    comp.threshold.value = -30 + settings.threshold * 20
-    comp.ratio.value = 1 + settings.ratio * 12
-    inputNode.connect(comp)
-    out = comp
-  }
-  if (type === 'noise gate') {
-    const gate = ctx.createGain()
-    gate.gain.value = Math.max(0.1, 1 - (settings.threshold ?? 0.3))
-    inputNode.connect(gate)
-    out = gate
-  }
-  return out
-}
-
-export const playTestTone = async (tone) => {
-  const ctx = await ensureContext()
-  const osc = ctx.createOscillator()
-  const harmonics = ctx.createOscillator()
-  const mix = ctx.createGain(); mix.gain.value = 0.2
-  const ampGain = ctx.createGain(); ampGain.gain.value = 0.25 + tone.ampSettings.gain * 0.4
-  const eq = ctx.createBiquadFilter(); eq.type = 'lowshelf'; eq.frequency.value = 250; eq.gain.value = (tone.ampSettings.bass - 0.5) * 12
-  let node = mix
-
-  tone.pedals.forEach((p) => { if (p.settings.enabled) node = addPedalNode(ctx, p.type, p.settings, node) })
-
-  osc.type = 'sawtooth'; osc.frequency.value = 110
-  harmonics.type = 'triangle'; harmonics.frequency.value = 220
-  osc.connect(mix); harmonics.connect(mix)
-  node.connect(eq); eq.connect(ampGain); ampGain.connect(ctx.destination)
-  osc.start(); harmonics.start(); osc.stop(ctx.currentTime + 1.5); harmonics.stop(ctx.currentTime + 1.5)
-  currentNodes = [osc, harmonics, mix, node, eq, ampGain]
-}
-
-export const startMicInput = async (tone) => {
-  const ctx = await ensureContext()
-  mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true })
-  const src = ctx.createMediaStreamSource(mediaStream)
-  let node = src
-  tone.pedals.forEach((p) => { if (p.settings.enabled) node = addPedalNode(ctx, p.type, p.settings, node) })
-  node.connect(ctx.destination)
-  currentNodes = [src, node]
-}
-
-export const stopAudio = () => {
-  currentNodes.forEach((n) => { try { n.disconnect() } catch { /* noop */ } })
-  currentNodes = []
-  if (mediaStream) mediaStream.getTracks().forEach((t) => t.stop())
-}
+export async function startLiveInput(tone){try{stopAudio();const c=await ensure();mic=await navigator.mediaDevices.getUserMedia({audio:true});const src=c.createMediaStreamSource(mic);buildChain(c,src,tone);active.push(src)}catch(e){throw new Error(`Live input failed: ${e.message}`)}}
+export function stopAudio(){active.forEach(n=>{try{n.disconnect()}catch{}});active=[];if(mic){mic.getTracks().forEach(t=>t.stop());mic=null}}

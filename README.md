@@ -1,56 +1,40 @@
-# Tone Forge MVP (React + Vite)
+# Tone Forge MVP
 
-A testable guitar tone builder MVP that is **data-driven** and avoids real trademarked gear names.
+React + Vite guitar tone-building MVP (frontend only) with Web Audio API and localStorage persistence.
 
-## Run locally
+## Install and run
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Main tabs
-- **Gear Profile**: Save your guitar/pickup/amp/pedal profile in `localStorage`.
-- **Tone Builder**: Choose guitar, amp, cab, reorder pedals, and tweak knob settings.
-- **Presets**: Load starter tones.
-- **Test Audio**: Test synthetic guitar tone and optional microphone/guitar-interface input.
+## Features that work
+- Gear Profile tab with owned guitar, pickup type, amp, pedals, cab size, and notes.
+- Tone Builder tab with guitar/amp/cab selection, pedal add/remove/reorder, amp sliders, signal-chain display, tone save, and gear adaptation.
+- Presets tab with 14 style presets.
+- Test Audio tab with Test Riff or Live Input modes, plus Stop button.
+- Error box shown in UI when audio calls fail.
+- Saved tones persisted in `localStorage` (save/load/delete).
 
-## Core MVP behaviors
-- Data-driven gear catalog in `src/data/gearCatalog.js`.
-- Tone adaptation logic in `src/utils/toneAdapter.js`.
-- Web Audio chain builder in `src/audio/audioEngine.js`.
-- Saved tones and current tone state persisted to `localStorage`.
+## Audio engine summary
+- AudioContext is only created after user button click.
+- Test riff uses oscillator notes + ADSR-like envelope for a guitar-like feel.
+- Chain includes input gain, EQ (biquad filters), distortion waveshaper, compressor, delay with feedback, wet/dry mix, and output gain.
+- Live input uses `getUserMedia` and runs through the same chain.
 
-## Real audio processing in this MVP
-- Oscillator-based guitar-like test signal.
-- Pedal/amp chain with:
-  - gain staging
-  - waveshaper distortion
-  - filter-based EQ/wah approximation
-  - compressor
-  - feedback delay network
-  - simplified noise gate
-- Live microphone input with `getUserMedia` routed through selected chain.
+## Simplified / placeholder parts
+- No impulse-response cab simulation.
+- Pedal settings UI is simplified for stability.
+- Effects are approximations intended for MVP testing.
 
-## Placeholder/simplified pieces
-- Cabinet selection is currently visual/organizational only (no impulse response cabinet IR loading yet).
-- Reverb is simplified via delay-network behavior (not studio IR convolution).
-- Modulation effects (chorus/phaser/flanger) are simplified and share a core delay/modulation approach.
+## Extending the catalog
+- Add guitars/amps/cabinets/pedals in `src/data/gearCatalog.js`.
+- Add preset objects in `src/data/presets.js`.
+- Add tone-adaptation rules in `src/utils/toneAdapter.js`.
 
-## Project structure
-- `src/data/gearCatalog.js`
-- `src/audio/audioEngine.js`
-- `src/utils/toneAdapter.js`
-- `src/components/SignalChain.jsx`
-- `src/App.jsx`
-
-### If you see a blank/white screen
-- Open DevTools and clear localStorage for the app origin, then refresh.
-- This build now guards against malformed saved tones/pedals, but old invalid local data can still be removed with a reset.
-
-## Project structure
-- `src/data/gearCatalog.js`
-- `src/audio/audioEngine.js`
-- `src/utils/toneAdapter.js`
-- `src/components/SignalChain.jsx`
-- `src/App.jsx`
+## White screen troubleshooting
+1. Open browser console for runtime errors.
+2. Check missing import/export paths.
+3. Check terminal output from Vite.
+4. Restart dev server (`Ctrl+C`, then `npm run dev`).
