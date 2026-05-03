@@ -2,11 +2,22 @@
 
 React + Vite guitar tone-building MVP (frontend only) with Web Audio API and localStorage persistence.
 
+## ⚠️ Important: do NOT open `index.html` directly
+This project is a **Vite app**. If you double-click `index.html` (using `file://`), the app can show a white screen because browser module loading differs from a dev server.
+
+Use the app this way:
 ## Install and run
 
 ```bash
 npm install
 npm run dev
+```
+
+Then open the localhost URL shown in the terminal (usually `http://localhost:5173/`).
+
+## Build check
+```bash
+npm run build
 ```
 
 ## Features that work
@@ -34,6 +45,11 @@ npm run dev
 - Add tone-adaptation rules in `src/utils/toneAdapter.js`.
 
 ## White screen troubleshooting
+1. Confirm you started with `npm run dev` (not `file://index.html`).
+2. Open browser console for runtime errors.
+3. Check missing import/export paths.
+4. Check terminal output from Vite.
+5. Restart dev server (`Ctrl+C`, then `npm run dev`).
 1. Open browser console for runtime errors.
 2. Check missing import/export paths.
 3. Check terminal output from Vite.
