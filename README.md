@@ -1,56 +1,71 @@
-# Tone Forge MVP (React + Vite)
+# Song Tone Match MVP (No-Build)
 
-A testable guitar tone builder MVP that is **data-driven** and avoids real trademarked gear names.
+This is a no-subscription, no-login, no-paywall MVP for matching song/artist tone ideas to your own guitar gear.
 
-## Run locally
+## How to run
 
-```bash
-npm install
-npm run dev
-```
+1. Download the ZIP.
+2. Extract the ZIP.
+3. Double-click `index.html`.
 
-## Main tabs
-- **Gear Profile**: Save your guitar/pickup/amp/pedal profile in `localStorage`.
-- **Tone Builder**: Choose guitar, amp, cab, reorder pedals, and tweak knob settings.
-- **Presets**: Load starter tones.
-- **Test Audio**: Test synthetic guitar tone and optional microphone/guitar-interface input.
+No install is needed for the app. The runtime app does not use React, Vite, npm, a backend, imports, modules, or external packages. The app code and styles are embedded directly inside `index.html` so mobile file previews do not have to load separate script files.
 
-## Core MVP behaviors
-- Data-driven gear catalog in `src/data/gearCatalog.js`.
-- Tone adaptation logic in `src/utils/toneAdapter.js`.
-- Web Audio chain builder in `src/audio/audioEngine.js`.
-- Saved tones and current tone state persisted to `localStorage`.
+## Main workflow
 
-## Real audio processing in this MVP
-- Oscillator-based guitar-like test signal.
-- Pedal/amp chain with:
-  - gain staging
-  - waveshaper distortion
-  - filter-based EQ/wah approximation
-  - compressor
-  - feedback delay network
-  - simplified noise gate
-- Live microphone input with `getUserMedia` routed through selected chain.
+1. Save your real gear profile.
+2. Type a song title, artist, and style on **Song Tone Match**.
+3. The app checks a built-in local `songToneDatabase`.
+4. If there is no exact match, it estimates from artist/style rules.
+5. The app adapts the tone to your saved gear, including the pedals you typed into your profile, and gives dial-in settings.
 
-## Placeholder/simplified pieces
-- Cabinet selection is currently visual/organizational only (no impulse response cabinet IR loading yet).
-- Reverb is simplified via delay-network behavior (not studio IR convolution).
-- Modulation effects (chorus/phaser/flanger) are simplified and share a core delay/modulation approach.
+## Included default profile
 
-## Project structure
-- `src/data/gearCatalog.js`
-- `src/audio/audioEngine.js`
-- `src/utils/toneAdapter.js`
-- `src/components/SignalChain.jsx`
-- `src/App.jsx`
+- Guitar: Benji Madden Signature
+- Pickup type: P90
+- Amp: Fender Mustang LT25
+- Speaker: 1x8 combo speaker
+- Notes: beginner/home practice setup
+- Featured pedals: SAPHUE Classic Chorus, Rowin Spring Reverb, KMISE Analog Delay, Behringer Vintage Delay VD400, Danelectro FAB Flange, Danelectro FAB Distortion, JOYO Dark Flame
 
-### If you see a blank/white screen
-- Open DevTools and clear localStorage for the app origin, then refresh.
-- This build now guards against malformed saved tones/pedals, but old invalid local data can still be removed with a reset.
+## Pedal-aware matching
 
-## Project structure
-- `src/data/gearCatalog.js`
-- `src/audio/audioEngine.js`
-- `src/utils/toneAdapter.js`
-- `src/components/SignalChain.jsx`
-- `src/App.jsx`
+The **Pedals owned** field is used during tone matching. If you type pedals like JOYO Dark Flame, Danelectro FAB Distortion, SAPHUE Classic Chorus, Rowin Spring Reverb, KMISE Analog Delay, Behringer Vintage Delay VD400, Danelectro FAB Flange, Boss DS-1, Boss SD-1, Ibanez Tube Screamer, Pro Co RAT, Big Muff, Boss NS-2, Boss DD-7, Strymon BigSky, Boss CE-2, MXR Phase 90, MXR 10-Band EQ, or Dunlop Cry Baby Wah, the app prefers those pedals in the recommended Stomp/Modulation/Delay/Reverb slots before falling back to amp or built-in effect suggestions.
+
+## Special supported amps
+
+- Fender Mustang LT25
+- Fender Squier Champ 15
+
+The Song Tone Match adapter has specific small-practice-amp rules for both of these amps, including tighter bass and controlled gain recommendations.
+
+## Persistence
+
+- Save Profile uses `localStorage`.
+- Saved matched tones use `localStorage`.
+- If localStorage is blocked by the browser, the app shows a visible error instead of crashing.
+
+## Runtime files
+
+The app you open and use is self-contained in:
+
+- `index.html` (fully self-contained app for double-click/open-in-browser use)
+
+These files are kept as editable/reference copies of the same no-build app assets:
+
+- `style.css`
+- `app.js`
+- `README.md`
+
+Some legacy project files may still exist in the repository only to keep the branch mergeable, but they are not required to run or test this no-build MVP.
+
+## Notes
+
+- This MVP uses a local tone database and rule-based adaptation.
+- It does not pull real-time internet data yet.
+- It gives estimated settings to help users get close to a tone.
+- Future versions could add online lookup or AI tone research.
+- Live input may require localhost or HTTPS if added later.
+
+## Disclaimer
+
+Gear names are used for reference only. This app is not affiliated with or endorsed by any gear manufacturer.
