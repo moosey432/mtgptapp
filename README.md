@@ -8,7 +8,7 @@ This is a no-subscription, no-login, no-paywall MVP for matching song/artist ton
 2. Extract the ZIP.
 3. Double-click `index.html`.
 
-No install is needed. There is no React, no Vite, no npm step, no backend, no imports, no modules, and no external packages. The app code and styles are also embedded directly inside `index.html` so mobile file previews do not have to load separate script files.
+No install is needed for the app. The runtime app does not use React, Vite, npm, a backend, imports, modules, or external packages. The app code and styles are embedded directly inside `index.html` so mobile file previews do not have to load separate script files.
 
 ## Main workflow
 
@@ -32,12 +32,19 @@ No install is needed. There is no React, no Vite, no npm step, no backend, no im
 - Saved matched tones use `localStorage`.
 - If localStorage is blocked by the browser, the app shows a visible error instead of crashing.
 
-## File structure
+## Runtime files
+
+The app you open and use is self-contained in:
 
 - `index.html` (fully self-contained app for double-click/open-in-browser use)
-- `style.css` (same styles kept separately for editing/reference)
-- `app.js` (same JavaScript kept separately for editing/reference)
+
+These files are kept as editable/reference copies of the same no-build app assets:
+
+- `style.css`
+- `app.js`
 - `README.md`
+
+Some legacy project files may still exist in the repository only to keep the branch mergeable, but they are not required to run or test this no-build MVP.
 
 ## Notes
 
