@@ -26,6 +26,11 @@ No install is needed for the app. The runtime app does not use React, Vite, npm,
 - Amp: Fender Mustang LT25
 - Speaker: 1x8 combo speaker
 - Notes: beginner/home practice setup
+- Featured pedals: Joyo Dark Flame, Danelectro FAB Distortion, Danelectro FAB Flanger, Behringer Vintage Delay VD400, Saphue Classic Chorus, Kmise Spring Reverb, Kmise mini drive
+
+## Pedal-aware matching
+
+The **Pedals owned** field is used during tone matching. Your featured board pedals are now recognized: Joyo Dark Flame, Danelectro FAB Distortion, Danelectro FAB Flanger, Behringer Vintage Delay VD400, Saphue Classic Chorus, Kmise Spring Reverb, and Kmise mini drive. The app also recognizes pedals like Boss DS-1, Boss SD-1, Ibanez Tube Screamer, Pro Co RAT, Big Muff, Boss NS-2, Boss DD-7, Strymon BigSky, Boss CE-2, MXR Phase 90, MXR 10-Band EQ, and Dunlop Cry Baby Wah. It prefers matching owned pedals in the recommended Stomp/Modulation/Delay/Reverb slots before falling back to amp or built-in effect suggestions.
 - Featured pedals: SAPHUE Classic Chorus, Rowin Spring Reverb, KMISE Analog Delay, Behringer Vintage Delay VD400, Danelectro FAB Flange, Danelectro FAB Distortion, JOYO Dark Flame
 
 ## Pedal-aware matching

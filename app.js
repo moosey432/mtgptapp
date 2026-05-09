@@ -4,6 +4,7 @@
     pickupType: 'P90',
     amp: 'Fender Mustang LT25',
     speaker: '1x8 combo speaker',
+    pedalsOwned: 'Joyo Dark Flame, Danelectro FAB Distortion, Danelectro FAB Flanger, Behringer Vintage Delay VD400, Saphue Classic Chorus, Kmise Spring Reverb, Kmise mini drive',
     pedalsOwned: 'SAPHUE Classic Chorus, Rowin Spring Reverb, KMISE Analog Delay, Behringer Vintage Delay VD400, Danelectro FAB Flange, Danelectro FAB Distortion, JOYO Dark Flame',
     pedalsOwned: '',
     skillLevel: 'Beginner',
@@ -26,6 +27,22 @@
       'Fender Twin Reverb', 'Fender Deluxe Reverb', 'Vox AC30', 'Marshall Plexi', 'Marshall JCM800',
       'Mesa Boogie Dual Rectifier', 'Peavey 5150', 'EVH 5150III', 'Orange Rockerverb', 'Boss Katana',
       'Line 6 Helix', 'Fender Mustang LT25', 'Fender Squier Champ 15',
+    ],
+    featuredPedals: [
+      { name: 'Joyo Dark Flame', role: 'High-gain modern distortion for metal, hard rock, and tight rhythm tones.' },
+      { name: 'Danelectro FAB Distortion', role: 'Budget distortion for punk, grunge, classic rock crunch, and dirty leads.' },
+      { name: 'Danelectro FAB Flanger', role: 'Flanger/modulation for 80s lead movement, grunge texture, and dramatic clean effects.' },
+      { name: 'Behringer Vintage Delay VD400', role: 'Analog-style delay for slapback, lead thickening, ambient repeats, and classic delay sounds.' },
+      { name: 'Saphue Classic Chorus', role: 'Chorus for clean shimmer, pop-punk cleans, 80s color, and wide rhythm parts.' },
+      { name: 'Kmise Spring Reverb', role: 'Spring-style reverb for surfy cleans, room depth, worship ambience, and vintage feel.' },
+      { name: 'Kmise mini drive', role: 'Mini overdrive/boost option for pushing a small amp or tightening punk/crunch tones.' },
+    ],
+    pedals: [
+      'Joyo Dark Flame', 'Danelectro FAB Distortion', 'Danelectro FAB Flanger', 'Behringer Vintage Delay VD400',
+      'Saphue Classic Chorus', 'Kmise Spring Reverb', 'Kmise mini drive',
+      'Boss DS-1', 'Boss SD-1', 'Ibanez Tube Screamer', 'Pro Co RAT', 'Electro-Harmonix Big Muff',
+      'Boss Metal Zone', 'MXR Phase 90', 'Boss CE-2 Chorus', 'Boss DD-7 Delay', 'Strymon BigSky',
+      'Boss NS-2 Noise Suppressor', 'MXR 10-Band EQ', 'Dunlop Cry Baby Wah',
       'Line 6 Helix', 'Fender Mustang LT25',
     ],
     pedals: [
@@ -459,6 +476,7 @@
 
     if (ownsPedals) {
       if (style.includes('metal')) {
+        useOwnedPedal('stomp', 'Joyo Dark Flame for main high gain', ['joyo dark flame', 'dark flame'])
         useOwnedPedal('stomp', 'JOYO Dark Flame for high-gain distortion', ['dark flame', 'joyo'])
           || useOwnedPedal('stomp', 'Danelectro FAB Distortion for main distortion', ['fab distortion', 'danelectro distortion'])
           || useOwnedPedal('stomp', 'Ibanez Tube Screamer as a tight boost', ['tube screamer', 'ts9', 'ibanez'])
@@ -471,6 +489,8 @@
         }
       }
       if (style.includes('punk') || style.includes('crunch') || style.includes('lead')) {
+        useOwnedPedal('stomp', 'Danelectro FAB Distortion for crunchy drive', ['fab distortion', 'danelectro fab distortion'])
+          || useOwnedPedal('stomp', 'Kmise mini drive as a boost/overdrive', ['kmise mini drive', 'kmise drive', 'mini drive'])
         useOwnedPedal('stomp', 'Danelectro FAB Distortion for crunchy punk drive', ['fab distortion', 'danelectro distortion'])
           || useOwnedPedal('stomp', 'JOYO Dark Flame with gain backed down for tight crunch', ['dark flame', 'joyo'])
           || useOwnedPedal('stomp', 'Boss DS-1 for crunchy drive', ['ds-1', 'boss ds'])
@@ -479,6 +499,7 @@
           || useOwnedPedal('stomp', 'Ibanez Tube Screamer for mid push', ['tube screamer', 'ts9', 'ibanez']);
       }
       if (style.includes('grunge')) {
+        useOwnedPedal('stomp', 'Danelectro FAB Distortion for grunge distortion', ['fab distortion', 'danelectro fab distortion'])
         useOwnedPedal('stomp', 'Danelectro FAB Distortion for raw grunge drive', ['fab distortion', 'danelectro distortion'])
           || useOwnedPedal('stomp', 'JOYO Dark Flame with lower gain for heavy grunge', ['dark flame', 'joyo'])
           || useOwnedPedal('stomp', 'Pro Co RAT for grunge distortion', ['rat', 'pro co'])
@@ -486,6 +507,8 @@
           || useOwnedPedal('stomp', 'Electro-Harmonix Big Muff for fuzz', ['big muff', 'muff']);
       }
       if (style.includes('clean') || style.includes('funk') || style.includes('blues')) {
+        useOwnedPedal('modulation', 'Saphue Classic Chorus lightly mixed', ['saphue', 'classic chorus'])
+          || useOwnedPedal('modulation', 'Danelectro FAB Flanger very subtle', ['fab flanger', 'danelectro fab flanger', 'flanger'])
         useOwnedPedal('modulation', 'SAPHUE Classic Chorus lightly mixed', ['saphue', 'classic chorus'])
           || useOwnedPedal('modulation', 'Danelectro FAB Flange for movement', ['fab flange', 'flange', 'flanger'])
           || useOwnedPedal('modulation', 'Boss CE-2 Chorus lightly mixed', ['ce-2', 'chorus'])
@@ -496,6 +519,10 @@
         }
       }
       if (style.includes('ambient') || style.includes('worship') || style.includes('lead')) {
+        useOwnedPedal('delay', 'Behringer Vintage Delay VD400', ['vd400', 'vintage delay', 'behringer vintage delay'])
+          || useOwnedPedal('delay', 'Boss DD-7 Delay', ['dd-7', 'delay'])
+          || useOwnedPedal('delay', 'Use your delay pedal for repeats', ['timeline', 'echo']);
+        useOwnedPedal('reverb', 'Kmise Spring Reverb', ['kmise spring reverb', 'spring reverb'])
         useOwnedPedal('delay', 'KMISE Analog Delay for repeats', ['kmise', 'analog delay'])
           || useOwnedPedal('delay', 'Behringer Vintage Delay VD400 for darker repeats', ['vd400', 'vintage delay', 'behringer delay'])
           || useOwnedPedal('delay', 'Boss DD-7 Delay', ['dd-7', 'delay'])
@@ -510,6 +537,7 @@
       if (ownedPedalsUsed.length) {
         explanation.push(`The pedal plan was adapted from your owned pedals field: ${[...new Set(ownedPedalsUsed)].join(', ')}.`);
       } else {
+        explanation.push('You listed pedals, but the app did not recognize exact supported names yet, so it kept amp/built-in effect suggestions. Try names like Joyo Dark Flame, FAB Distortion, FAB Flanger, Vintage Delay VD400, Saphue Classic Chorus, Kmise Spring Reverb, Boss DS-1, Tube Screamer, RAT, Big Muff, DD-7, BigSky, NS-2, CE-2, Phase 90, or MXR 10-Band EQ.');
         explanation.push('You listed pedals, but the app did not recognize exact supported names yet, so it kept amp/built-in effect suggestions. Try names like JOYO Dark Flame, FAB Distortion, SAPHUE Classic Chorus, Rowin Spring Reverb, KMISE Analog Delay, Behringer VD400, Boss DS-1, Tube Screamer, RAT, Big Muff, DD-7, BigSky, NS-2, CE-2, Phase 90, or MXR 10-Band EQ.');
       }
     }
