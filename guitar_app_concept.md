@@ -66,3 +66,31 @@ A literal catalog of "every amp/guitar/pedal in the world" is not realistic at l
 - Session retention (D7/D30).
 - Preset save/share rate.
 - User-reported match quality against target tone.
+
+## How to Test (Current State + Next Build)
+### Current state (as of May 2, 2026)
+There is no runnable app in this repository yet; it currently contains a product concept document only.
+
+### Recommended test plan for first runnable prototype
+1. **Audio I/O sanity**
+   - Verify input signal from interface at multiple sample rates (44.1k, 48k, 96k).
+   - Confirm output path has no clipping and acceptable noise floor.
+2. **Latency budget**
+   - Measure round-trip latency and target under 10 ms for real-time playability.
+   - Compare latency with adaptation engine enabled vs disabled.
+3. **Preset correctness**
+   - Load each preset and confirm full chain integrity (amp, cab, pedals, parameter persistence).
+   - Run automated preset snapshot tests to catch regressions.
+4. **Adaptation quality**
+   - Provide reference tone clips and score similarity using spectral/dynamic metrics.
+   - Add human listening tests (blind A/B) across at least 10 guitarists.
+5. **Performance and stability**
+   - Soak test 60-minute sessions with live parameter changes.
+   - Monitor CPU/memory usage per preset class (clean, crunch, high gain).
+6. **Device/gear compatibility**
+   - Test across common interfaces and pickup types (single-coil, P90, humbucker).
+   - Validate fallback behavior when unknown gear is selected.
+7. **Beta acceptance criteria**
+   - 95% crash-free sessions.
+   - Median time-to-good-tone under 5 minutes.
+   - Positive tone-match rating from at least 70% of beta users.

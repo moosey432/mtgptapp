@@ -1,36 +1,12 @@
-export const adaptToneToProfile = (tone, profile) => {
-  const updates = structuredClone(tone)
-  const notes = []
-  const pickup = profile.pickupType?.toLowerCase()
-  const amp = profile.ownedAmp?.toLowerCase() ?? ''
-
-  if (pickup === 'humbucker') {
-    updates.ampSettings.gain = Math.max(0, updates.ampSettings.gain - 0.08)
-    updates.ampSettings.treble = Math.min(1, updates.ampSettings.treble + 0.08)
-    notes.push('Humbuckers detected: reduced gain and brightened treble.')
-  }
-  if (pickup === 'single coil') {
-    updates.ampSettings.gain = Math.min(1, updates.ampSettings.gain + 0.08)
-    updates.ampSettings.treble = Math.max(0, updates.ampSettings.treble - 0.06)
-    notes.push('Single coils detected: boosted gain/compression feel and softened top end.')
-  }
-  if (pickup === 'active') {
-    updates.inputGain = Math.max(0.2, updates.inputGain - 0.15)
-    notes.push('Active pickups detected: lowered input gain to avoid clipping.')
-  }
-  if (amp.includes('small') || amp.includes('practice')) {
-    updates.ampSettings.mids = Math.min(1, updates.ampSettings.mids + 0.1)
-    updates.ampSettings.bass = Math.max(0, updates.ampSettings.bass - 0.1)
-    notes.push('Practice amp profile: increased mids and tightened bass.')
-  }
-
-  const ownedPedals = (profile.ownedPedals || '').toLowerCase()
-  if (!ownedPedals.includes('delay') && !updates.pedals.some((p) => p.type === 'delay')) {
-    notes.push('No delay pedal in profile: consider enabling app delay.')
-  }
-  if (!ownedPedals.includes('reverb') && !updates.pedals.some((p) => p.type === 'reverb')) {
-    notes.push('No reverb pedal in profile: consider enabling app reverb.')
-  }
-
-  return { updates, notes }
+export function adaptToneToMyGear(tone, profile) {
+  const next = structuredClone(tone); const changes=[]; const p=(profile.pickupType||'').toLowerCase(); const cab=(profile.cabSize||'').toLowerCase(); const pedals=(profile.ownedPedals||'').toLowerCase();
+  if(p.includes('humbucker')){next.ampSettings.gain=Math.max(0,next.ampSettings.gain-0.08);next.ampSettings.treble=Math.min(1,next.ampSettings.treble+0.06);next.ampSettings.presence=Math.min(1,next.ampSettings.presence+0.05);next.ampSettings.bass=Math.max(0,next.ampSettings.bass-0.05);changes.push('Humbuckers: reduced gain, raised treble/presence, tightened bass.')}
+  if(p.includes('single')){next.ampSettings.gain=Math.min(1,next.ampSettings.gain+0.08);next.ampSettings.treble=Math.max(0,next.ampSettings.treble-0.05);next.ampSettings.mid=Math.min(1,next.ampSettings.mid+0.08);changes.push('Single coils: added gain/mids and softened top end.')}
+  if(p.includes('p90')){changes.push('P90: added light gate guidance, smoothed highs, boosted mids.');next.ampSettings.treble=Math.max(0,next.ampSettings.treble-0.05);next.ampSettings.mid=Math.min(1,next.ampSettings.mid+0.08)}
+  if(p.includes('active')){next.inputGain=Math.max(0.2,next.inputGain-0.1);next.ampSettings.gain=Math.max(0,next.ampSettings.gain-0.07);next.ampSettings.bass=Math.max(0,next.ampSettings.bass-0.06);changes.push('Active pickups: lowered input/drive and tightened bass.')}
+  if(p.includes('acoustic')){next.ampSettings.gain=0.18;changes.push('Acoustic pickup: clean gain with extra compression/reverb suggestion.')}
+  if(cab.includes('1x12 practice')||cab.includes('practice')){next.ampSettings.bass=Math.max(0,next.ampSettings.bass-0.08);next.ampSettings.mid=Math.min(1,next.ampSettings.mid+0.1);changes.push('Practice amp/cab: reduced bass, raised mids, suggested lower gain.')}
+  if(!pedals.includes('delay')) changes.push('No owned delay listed: use app delay for space.');
+  if(!pedals.includes('reverb')) changes.push('No owned reverb listed: use app reverb for ambience.');
+  return {tone:next, changes}
 }
