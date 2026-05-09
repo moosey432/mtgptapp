@@ -16,6 +16,7 @@ No install is needed for the app. The runtime app does not use React, Vite, npm,
 2. Type a song title, artist, and style on **Song Tone Match**.
 3. The app checks a built-in local `songToneDatabase`.
 4. If there is no exact match, it estimates from artist/style rules.
+5. The app adapts the tone to your saved gear, including the pedals you typed into your profile, and gives dial-in settings.
 5. The app adapts the tone to your saved gear and gives dial-in settings.
 
 ## Included default profile
@@ -25,6 +26,11 @@ No install is needed for the app. The runtime app does not use React, Vite, npm,
 - Amp: Fender Mustang LT25
 - Speaker: 1x8 combo speaker
 - Notes: beginner/home practice setup
+- Featured pedals: SAPHUE Classic Chorus, Rowin Spring Reverb, KMISE Analog Delay, Behringer Vintage Delay VD400, Danelectro FAB Flange, Danelectro FAB Distortion, JOYO Dark Flame
+
+## Pedal-aware matching
+
+The **Pedals owned** field is used during tone matching. If you type pedals like JOYO Dark Flame, Danelectro FAB Distortion, SAPHUE Classic Chorus, Rowin Spring Reverb, KMISE Analog Delay, Behringer Vintage Delay VD400, Danelectro FAB Flange, Boss DS-1, Boss SD-1, Ibanez Tube Screamer, Pro Co RAT, Big Muff, Boss NS-2, Boss DD-7, Strymon BigSky, Boss CE-2, MXR Phase 90, MXR 10-Band EQ, or Dunlop Cry Baby Wah, the app prefers those pedals in the recommended Stomp/Modulation/Delay/Reverb slots before falling back to amp or built-in effect suggestions.
 
 ## Special supported amps
 
