@@ -41,6 +41,11 @@ textarea { min-height: 90px; }
 .slider { display: grid; grid-template-columns: 110px 1fr 42px; gap: 10px; align-items: center; margin: 8px 0; }
 .slider input { padding: 0; }
 .result-title { color: var(--good); }
+details.card summary { cursor: pointer; font-size: 1.15rem; font-weight: 800; }
+details.card summary::-webkit-details-marker { color: var(--primary); }
+footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+@media (max-width: 640px) { .tabs button, .row button, .row input { width: 100%; } .slider { grid-template-columns: 1fr; } }
+        </style>
 footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
 @media (max-width: 640px) { .tabs button, .row button, .row input { width: 100%; } .slider { grid-template-columns: 1fr; } }
 
@@ -49,6 +54,57 @@ footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
   <body>
     <div id="app">
       <h1>Song Tone Match MVP</h1>
+      <p class="small">No subscription • No paywall • No login • No backend • This page is usable even if your phone file preview blocks JavaScript.</p>
+      <section class="card">
+        <h2>Tap the sections below</h2>
+        <p>If the enhanced app does not replace this screen, your viewer is blocking JavaScript. These fallback controls still let you view and edit the starter tone plan. For saving/matching, use Share → Open in Browser.</p>
+      </section>
+      <details class="card" open>
+        <summary>Gear Profile</summary>
+        <div class="grid">
+          <label>Guitar<input value="Benji Madden Signature" /></label>
+          <label>Pickup type<select><option selected>P90</option><option>Single coil</option><option>Humbucker</option><option>Active pickups</option></select></label>
+          <label>Amp<input value="Fender Mustang LT25" /></label>
+          <label>Speaker/cab<input value="1x8 combo speaker" /></label>
+          <label>Pedals owned<textarea>Joyo Dark Flame, Danelectro FAB Distortion, Danelectro FAB Flanger, Behringer Vintage Delay VD400, Saphue Classic Chorus, Kmise Spring Reverb, Kmise mini drive</textarea></label>
+          <label>Skill level<input value="Beginner" /></label>
+        </div>
+      </details>
+      <details class="card" open>
+        <summary>Song Tone Match</summary>
+        <div class="grid">
+          <label>Song title<input placeholder="Example: pop punk rhythm" /></label>
+          <label>Artist<input placeholder="Example: Good Charlotte" /></label>
+          <label>Tone style<select><option>Punk</option><option>Clean</option><option>Crunch</option><option>Metal</option><option>Lead</option><option>Ambient</option><option>Grunge</option><option>Blues</option><option>Funk</option><option>Worship</option></select></label>
+        </div>
+        <div class="card">
+          <h3>Starter adapted settings for your gear</h3>
+          <p><b>Amp/model setup:</b> British Crunch / small-practice combo safe settings</p>
+          <div class="slider"><span>Gain</span><input type="range" min="0" max="10" value="7" /><b>7</b></div>
+          <div class="slider"><span>Volume</span><input type="range" min="0" max="10" value="6" /><b>6</b></div>
+          <div class="slider"><span>Treble</span><input type="range" min="0" max="10" value="7" /><b>7</b></div>
+          <div class="slider"><span>Bass</span><input type="range" min="0" max="10" value="3" /><b>3</b></div>
+          <p><b>Stomp:</b> Danelectro FAB Distortion or Joyo Dark Flame depending on gain needed.</p>
+          <p><b>Modulation:</b> Saphue Classic Chorus or Danelectro FAB Flanger.</p>
+          <p><b>Delay:</b> Behringer Vintage Delay VD400.</p>
+          <p><b>Reverb:</b> Kmise Spring Reverb.</p>
+          <p><b>Pickup:</b> bridge for punk/metal; neck for cleans.</p>
+        </div>
+      </details>
+      <details class="card">
+        <summary>Featured Pedals</summary>
+        <p><span class="pill">Joyo Dark Flame</span> high-gain metal/hard rock distortion.</p>
+        <p><span class="pill">Danelectro FAB Distortion</span> punk, grunge, and classic crunch.</p>
+        <p><span class="pill">Danelectro FAB Flanger</span> modulation and texture.</p>
+        <p><span class="pill">Behringer Vintage Delay VD400</span> analog-style delay.</p>
+        <p><span class="pill">Saphue Classic Chorus</span> clean shimmer and width.</p>
+        <p><span class="pill">Kmise Spring Reverb</span> spring-style ambience.</p>
+        <p><span class="pill">Kmise mini drive</span> boost/overdrive for small amps.</p>
+      </details>
+      <details class="card">
+        <summary>About</summary>
+        <p>Gear names are used for reference only. This app is not affiliated with or endorsed by any gear manufacturer.</p>
+      </details>
       <section class="card">
         <h2>JavaScript is starting</h2>
         <p>If the full app does not appear in a moment, use your phone browser's Share/Open in Browser option instead of a ZIP/file preview.</p>

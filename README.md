@@ -64,6 +64,10 @@ These files are kept as editable/reference copies of the same no-build app asset
 
 Some legacy project files may still exist in the repository only to keep the branch mergeable, but they are not required to run or test this no-build MVP.
 
+## If your phone shows the fallback screen
+
+Some mobile ZIP/file preview apps block JavaScript. If that happens, `index.html` now shows an interactive fallback with expandable sections, editable fields, sliders, and featured pedal guidance instead of getting stuck. For full save/load and automatic matching, use your phone browser option such as **Share → Open in Browser**.
+
 ## Notes
 
 - This MVP uses a local tone database and rule-based adaptation.
