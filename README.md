@@ -26,6 +26,13 @@ No install is needed for the app. The runtime app does not use React, Vite, npm,
 - Speaker: 1x8 combo speaker
 - Notes: beginner/home practice setup
 
+## Special supported amps
+
+- Fender Mustang LT25
+- Fender Squier Champ 15
+
+The Song Tone Match adapter has specific small-practice-amp rules for both of these amps, including tighter bass and controlled gain recommendations.
+
 ## Persistence
 
 - Save Profile uses `localStorage`.

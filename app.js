@@ -24,6 +24,7 @@
     amps: [
       'Fender Twin Reverb', 'Fender Deluxe Reverb', 'Vox AC30', 'Marshall Plexi', 'Marshall JCM800',
       'Mesa Boogie Dual Rectifier', 'Peavey 5150', 'EVH 5150III', 'Orange Rockerverb', 'Boss Katana',
+      'Line 6 Helix', 'Fender Mustang LT25', 'Fender Squier Champ 15',
       'Line 6 Helix', 'Fender Mustang LT25',
     ],
     pedals: [
@@ -36,6 +37,12 @@
       power: '25 watts',
       speaker: '1x8',
       notes: 'Has built-in amp models/effects, best for home practice, and should avoid too much bass because of the small speaker.',
+    },
+    squierChamp15: {
+      type: 'small solid-state practice combo amp',
+      power: '15 watts',
+      speaker: 'small combo speaker',
+      notes: 'Simple home-practice amp support: keep bass controlled, use moderate gain, and rely on pedals for heavier song tones when available.',
     },
   };
 
@@ -185,6 +192,7 @@
           </div>
           <div class="card">
             <h3>B. Adapted To My Gear</h3>
+            <p><b>Recommended amp/model setup:</b> ${escapeHtml(adapted.ampModel)}</p>
             <p><b>Recommended LT25 amp model style:</b> ${escapeHtml(adapted.ampModel)}</p>
             ${slider('Gain', adapted.gain)}
             ${slider('Volume', adapted.volume)}
@@ -247,6 +255,11 @@
         <p><b>Power:</b> ${gearLibrary.mustangLt25.power}</p>
         <p><b>Speaker:</b> ${gearLibrary.mustangLt25.speaker}</p>
         <p>${gearLibrary.mustangLt25.notes}</p>
+        <h3>Special supported amp: Fender Squier Champ 15</h3>
+        <p><b>Type:</b> ${gearLibrary.squierChamp15.type}</p>
+        <p><b>Power:</b> ${gearLibrary.squierChamp15.power}</p>
+        <p><b>Speaker:</b> ${gearLibrary.squierChamp15.speaker}</p>
+        <p>${gearLibrary.squierChamp15.notes}</p>
       </section>
     `;
   }
@@ -423,6 +436,14 @@
       settings.gain = Math.min(8, settings.gain);
       explanation.push('Your Fender Mustang LT25 has a 1x8 speaker, so bass is reduced, treble/clarity is raised, and extreme gain is avoided to reduce fizz.');
       if (!ownsPedals) explanation.push('Because no external pedals are listed, the recommendation uses LT25 built-in effect slots.');
+    }
+    if (amp.includes('squier champ 15') || amp.includes('champ 15')) {
+      ampModel = settings.gain >= 6 ? 'Drive channel / overdrive pedal into clean channel' : 'Clean channel with pedals as needed';
+      settings.bass = Math.max(2, settings.bass - 2);
+      settings.treble = Math.min(8, settings.treble + 1);
+      settings.gain = Math.min(7, settings.gain);
+      if (!ownsPedals && settings.gain >= 6) slots.stomp = 'Use amp drive; add distortion/OD pedal later if needed';
+      explanation.push('Your Fender Squier Champ 15 is treated as a small practice combo, so bass is reduced more aggressively, gain is capped to avoid fizz, and pedals are recommended for heavier song tones.');
     }
 
     return {
