@@ -1,3 +1,509 @@
+(function () {
+  const DEFAULT_PROFILE = {
+    guitar: 'Benji Madden Signature',
+    pickupType: 'P90',
+    amp: 'Fender Mustang LT25',
+    speaker: '1x8 combo speaker',
+    pedalsOwned: '',
+    skillLevel: 'Beginner',
+    notes: 'beginner/home practice setup',
+  };
+
+  const gearLibrary = {
+    guitars: [
+      { name: 'Benji Madden Signature', details: 'P90 default, medium/high output, mid-forward, raw, punchy; good for punk, pop punk, classic rock, grunge, crunch, and driven tones.' },
+      { name: 'Fender Stratocaster', details: 'Single-coil clarity for clean, blues, funk, ambient, and classic rock.' },
+      { name: 'Fender Telecaster', details: 'Bright bridge attack for country, indie, punk, and rock crunch.' },
+      { name: 'Gibson Les Paul', details: 'Humbucker sustain and thick rock/lead tones.' },
+      { name: 'Gibson SG', details: 'Raw humbucker attack for classic rock, doom, and punk.' },
+      { name: 'PRS Custom 24', details: 'Modern humbucker versatility for rock, lead, and fusion.' },
+      { name: 'Ibanez RG', details: 'Fast high-output platform for metal and lead.' },
+      { name: 'Jackson Soloist', details: 'High-gain focused guitar for modern rock and metal.' },
+      { name: 'ESP LTD EC-1000', details: 'Medium/high-output single-cut for hard rock and metal.' },
+    ],
+    amps: [
+      'Fender Twin Reverb', 'Fender Deluxe Reverb', 'Vox AC30', 'Marshall Plexi', 'Marshall JCM800',
+      'Mesa Boogie Dual Rectifier', 'Peavey 5150', 'EVH 5150III', 'Orange Rockerverb', 'Boss Katana',
+      'Line 6 Helix', 'Fender Mustang LT25',
+    ],
+    pedals: [
+      'Boss DS-1', 'Boss SD-1', 'Ibanez Tube Screamer', 'Pro Co RAT', 'Electro-Harmonix Big Muff',
+      'Boss Metal Zone', 'MXR Phase 90', 'Boss CE-2 Chorus', 'Boss DD-7 Delay', 'Strymon BigSky',
+      'Boss NS-2 Noise Suppressor', 'MXR 10-Band EQ', 'Dunlop Cry Baby Wah',
+    ],
+    mustangLt25: {
+      type: 'modeling practice combo amp',
+      power: '25 watts',
+      speaker: '1x8',
+      notes: 'Has built-in amp models/effects, best for home practice, and should avoid too much bass because of the small speaker.',
+    },
+  };
+
+  const songToneDatabase = [
+    tone('Metallica-style rhythm tone', 'Metallica', 'Metal', 'High-gain humbucker', 'Mesa/5150 high gain', 'Tube Screamer, noise gate', 'Tight palm-muted rhythm with fast attack.', 8, 5, 6, 4),
+    tone('Metallica-style clean tone', 'Metallica', 'Clean', 'Single-coil-ish clean guitar', 'JC-120/Fender clean', 'Chorus, reverb', 'Scooped clean shimmer with chorus.', 3, 5, 6, 5),
+    tone('Green Day-style punk tone', 'Green Day', 'Punk', 'P90 or humbucker bridge', 'Marshall JCM800', 'Overdrive', 'Mid-forward punk crunch.', 7, 6, 6, 4),
+    tone('Good Charlotte-style pop punk tone', 'Good Charlotte', 'Punk', 'P90 or humbucker bridge', 'Modern Marshall crunch', 'Overdrive, light gate', 'Punchy pop-punk rhythm.', 7, 6, 6, 4),
+    tone('Nirvana-style grunge tone', 'Nirvana', 'Grunge', 'Offset or humbucker guitar', 'Fender/Marshall mix', 'Distortion or fuzz', 'Raw, less-polished distorted grunge.', 7, 6, 5, 5),
+    tone('AC/DC-style classic rock tone', 'AC/DC', 'Crunch', 'SG-style bridge humbucker', 'Marshall Plexi', 'Minimal boost', 'Open classic-rock crunch.', 6, 7, 6, 5),
+    tone('Guns N’ Roses-style lead tone', 'Guns N’ Roses', 'Lead', 'Les Paul bridge humbucker', 'Hot Marshall', 'Delay, EQ', 'Singing mid-heavy lead.', 7, 6, 6, 5),
+    tone('Van Halen-style brown sound', 'Van Halen', 'Lead', 'Superstrat humbucker', 'Hot Plexi', 'Phase, short delay', 'Chewy brown-sound lead.', 7, 6, 6, 5),
+    tone('Blink-182-style punk tone', 'Blink-182', 'Punk', 'Bridge humbucker', 'Mesa/Marshall', 'OD, gate', 'Tight bright punk rhythm.', 7, 6, 6, 4),
+    tone('Black Sabbath-style doom tone', 'Black Sabbath', 'Metal', 'SG bridge pickup', 'Laney-style amp', 'Treble boost', 'Dark heavy doom riff tone.', 7, 6, 5, 6),
+    tone('Pink Floyd-style ambient lead', 'Pink Floyd', 'Ambient', 'Strat neck pickup', 'Hiwatt/Fender clean', 'Delay, reverb, modulation', 'Wide ambient lead sustain.', 4, 6, 6, 5),
+    tone('John Mayer-style clean blues', 'John Mayer', 'Blues', 'Strat neck pickup', 'Fender clean', 'Compressor, light reverb', 'Touch-sensitive clean blues.', 3, 6, 6, 5),
+    tone('Foo Fighters-style rock tone', 'Foo Fighters', 'Crunch', 'Bridge humbucker', 'Marshall/Vox crunch', 'Overdrive', 'Dense rock crunch.', 6, 6, 6, 5),
+    tone('Deftones-style heavy clean/metal tone', 'Deftones', 'Metal', 'Bridge humbucker', '5150/Rectifier', 'Delay, chorus', 'Atmospheric heavy clean-to-metal texture.', 7, 5, 6, 5),
+    tone('Slipknot-style modern metal tone', 'Slipknot', 'Metal', 'Active bridge pickup', '5150-style high gain', 'Gate, OD', 'Aggressive tight modern metal.', 9, 5, 6, 4),
+    tone('Pantera-style metal tone', 'Pantera', 'Metal', 'Bridge humbucker', 'Solid-state/5150-style', 'Gate, EQ', 'Scooped razor rhythm.', 9, 5, 7, 3),
+    tone('Queen-style lead tone', 'Queen', 'Lead', 'Treble-heavy bridge pickup', 'Vox AC30', 'Delay, treble boost', 'Vocal classic lead.', 6, 7, 7, 4),
+    tone('Weezer-style alt rock tone', 'Weezer', 'Crunch', 'Bridge humbucker', 'Marshall/Fender crunch', 'Distortion', 'Thick alt-rock crunch.', 7, 6, 6, 5),
+    tone('My Chemical Romance-style emo rock tone', 'My Chemical Romance', 'Lead', 'Bridge humbucker', 'Marshall high gain', 'Delay, OD', 'Cutting emo-rock lead.', 7, 6, 6, 5),
+    tone('Paramore-style pop rock tone', 'Paramore', 'Crunch', 'Bridge single coil or humbucker', 'Vox/Marshall crunch', 'OD, delay', 'Bright punchy pop-rock.', 6, 6, 7, 4),
+    tone('Arctic Monkeys-style indie rock tone', 'Arctic Monkeys', 'Crunch', 'Single-coil bridge', 'Vox-style crunch', 'Overdrive', 'Snappy indie crunch.', 5, 6, 7, 4),
+    tone('RHCP-style funk clean tone', 'RHCP', 'Funk', 'Strat middle/neck pickup', 'Fender clean', 'Compressor, chorus', 'Percussive funk clean.', 3, 7, 6, 4),
+    tone('Worship clean tone', 'Worship', 'Worship', 'Single-coil neck pickup', 'Fender/modeling clean', 'Delay, reverb, chorus', 'Sparkly spacious clean.', 3, 6, 6, 5),
+    tone('80s metal lead tone', 'Generic 80s', 'Lead', 'Bridge humbucker', 'Hot JCM800', 'Delay, chorus, gate', 'Sustained 80s lead.', 8, 6, 6, 4),
+    tone('Modern metal rhythm tone', 'Modern Metal', 'Metal', 'Active bridge humbucker', '5150/Rectifier', 'Gate, OD', 'Tight modern rhythm tone.', 8, 5, 6, 3),
+  ];
+
+  const state = {
+    tab: 'Gear Profile',
+    status: '',
+    error: '',
+    profile: safeLoad('songToneProfile', DEFAULT_PROFILE),
+    savedTones: safeLoad('songToneSavedTones', []),
+    currentMatch: null,
+  };
+
+  function tone(song, artist, style, guitarType, ampType, pedals, description, gain, volume, treble, bass) {
+    return {
+      song,
+      artist,
+      style,
+      original: { guitarType, ampType, pedals, description },
+      base: { gain, volume, treble, bass, mids: 6 },
+      slots: { stomp: 'Overdrive', modulation: 'None', delay: 'Short delay', reverb: 'Room' },
+    };
+  }
+
+  function start() {
+    renderShell();
+  }
+
+  function renderShell() {
+    const app = document.getElementById('app');
+    if (!app) return;
+    app.innerHTML = `
+      <h1>Song Tone Match MVP</h1>
+      <p class="small">No subscription • No paywall • No login • No backend • Opens directly from index.html</p>
+      <div class="tabs">${['Gear Profile', 'Song Tone Match', 'Saved Tones', 'Gear Library', 'About'].map((tab) => `<button class="${state.tab === tab ? 'active' : ''}" data-tab="${tab}">${tab}</button>`).join('')}</div>
+      <div id="status" class="status">${escapeHtml(state.status)}</div>
+      ${state.error ? `<div class="error">${escapeHtml(state.error)}</div>` : ''}
+      <main id="view"></main>
+      <footer>Gear names are used for reference only. This app is not affiliated with or endorsed by any gear manufacturer.</footer>
+    `;
+    app.querySelectorAll('[data-tab]').forEach((button) => {
+      button.addEventListener('click', () => {
+        state.tab = button.dataset.tab;
+        state.status = '';
+        state.error = '';
+        renderShell();
+      });
+    });
+    renderCurrentTab();
+  }
+
+  function renderCurrentTab() {
+    const view = document.getElementById('view');
+    if (!view) return;
+    if (state.tab === 'Gear Profile') renderGearProfile(view);
+    if (state.tab === 'Song Tone Match') renderSongToneMatch(view);
+    if (state.tab === 'Saved Tones') renderSavedTones(view);
+    if (state.tab === 'Gear Library') renderGearLibrary(view);
+    if (state.tab === 'About') renderAbout(view);
+  }
+
+  function renderGearProfile(view) {
+    view.innerHTML = `
+      <section class="card">
+        <h2>Gear Profile</h2>
+        <p class="small">Save your actual gear once, then every song tone match adapts to it.</p>
+        <div class="grid">
+          ${field('guitar', 'Guitar', state.profile.guitar)}
+          <label>Pickup type<select id="pickupType">${['Single coil', 'Humbucker', 'P90', 'Active pickups', 'Acoustic pickup'].map((pickup) => `<option ${state.profile.pickupType === pickup ? 'selected' : ''}>${pickup}</option>`).join('')}</select></label>
+          ${field('amp', 'Amp', state.profile.amp)}
+          ${field('speaker', 'Speaker/cab', state.profile.speaker)}
+          ${field('pedalsOwned', 'Pedals owned', state.profile.pedalsOwned)}
+          ${field('skillLevel', 'Skill level', state.profile.skillLevel)}
+        </div>
+        <label>Notes<textarea id="notes">${escapeHtml(state.profile.notes)}</textarea></label>
+        <div class="row">
+          <button class="primary big" id="saveProfile">Save Profile</button>
+          <button id="loadProfile">Load Profile</button>
+          <button id="resetProfile">Reset to My Default Gear</button>
+        </div>
+      </section>
+    `;
+    byId('saveProfile').addEventListener('click', saveProfile);
+    byId('loadProfile').addEventListener('click', loadProfile);
+    byId('resetProfile').addEventListener('click', resetProfile);
+  }
+
+  function renderSongToneMatch(view) {
+    view.innerHTML = `
+      <section class="card">
+        <h2>Song Tone Match</h2>
+        <p class="small">Search the local MVP database, or type anything and the app will estimate from artist/title/style.</p>
+        <div class="grid">
+          ${field('songTitle', 'Song title', '')}
+          ${field('artist', 'Artist', '')}
+          <label>Tone style<select id="toneStyle">${['Clean', 'Crunch', 'Punk', 'Metal', 'Lead', 'Ambient', 'Grunge', 'Blues', 'Funk', 'Worship'].map((style) => `<option>${style}</option>`).join('')}</select></label>
+        </div>
+        <button class="primary big" id="matchTone">Match Tone To My Gear</button>
+      </section>
+      ${state.currentMatch ? renderMatchResult(state.currentMatch) : ''}
+    `;
+    byId('matchTone').addEventListener('click', matchTone);
+    const saveButton = byId('saveTone');
+    if (saveButton) saveButton.addEventListener('click', saveCurrentTone);
+  }
+
+  function renderMatchResult(match) {
+    const adapted = match.adapted;
+    return `
+      <section class="card">
+        <h2 class="result-title">Matched Tone Card</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>A. Original Tone Estimate</h3>
+            <p><b>Artist/song:</b> ${escapeHtml(match.original.artist)} — ${escapeHtml(match.original.song)}</p>
+            <p><b>Original likely guitar:</b> ${escapeHtml(match.original.original.guitarType)}</p>
+            <p><b>Original likely amp:</b> ${escapeHtml(match.original.original.ampType)}</p>
+            <p><b>Original likely effects:</b> ${escapeHtml(match.original.original.pedals)}</p>
+            <p>${escapeHtml(match.original.original.description)}</p>
+          </div>
+          <div class="card">
+            <h3>B. Adapted To My Gear</h3>
+            <p><b>Recommended LT25 amp model style:</b> ${escapeHtml(adapted.ampModel)}</p>
+            ${slider('Gain', adapted.gain)}
+            ${slider('Volume', adapted.volume)}
+            ${slider('Treble', adapted.treble)}
+            ${slider('Bass', adapted.bass)}
+            <p><b>Stomp:</b> ${escapeHtml(adapted.slots.stomp)}</p>
+            <p><b>Modulation:</b> ${escapeHtml(adapted.slots.modulation)}</p>
+            <p><b>Delay:</b> ${escapeHtml(adapted.slots.delay)}</p>
+            <p><b>Reverb:</b> ${escapeHtml(adapted.slots.reverb)}</p>
+            <p><b>Pickup suggestion:</b> ${escapeHtml(adapted.pickup)}</p>
+            <p><b>Guitar volume/tone knobs:</b> ${escapeHtml(adapted.knobs)}</p>
+            <p><b>Playing tips:</b> ${escapeHtml(adapted.playingTips)}</p>
+          </div>
+        </div>
+        <div class="card">
+          <h3>C. Explanation</h3>
+          <ul>${adapted.explanation.map((line) => `<li>${escapeHtml(line)}</li>`).join('')}</ul>
+        </div>
+        <div class="row">
+          <input id="toneName" placeholder="Name this matched tone" />
+          <button class="primary big" id="saveTone">Save Matched Tone</button>
+        </div>
+      </section>
+    `;
+  }
+
+  function renderSavedTones(view) {
+    view.innerHTML = `
+      <section class="card">
+        <h2>Saved Tones</h2>
+        <p class="small">Matched tones are stored in localStorage and survive refreshes on this browser.</p>
+        ${state.savedTones.length ? state.savedTones.map((saved, index) => `
+          <div class="card">
+            <h3>${escapeHtml(saved.name)}</h3>
+            <p>${escapeHtml(saved.match.original.artist)} — ${escapeHtml(saved.match.original.song)}</p>
+            <div class="row">
+              <button data-load-tone="${index}">Load saved tone</button>
+              <button data-delete-tone="${index}">Delete</button>
+            </div>
+          </div>
+        `).join('') : '<p>No saved tones yet. Match a tone, then click Save Matched Tone.</p>'}
+      </section>
+    `;
+    view.querySelectorAll('[data-load-tone]').forEach((button) => button.addEventListener('click', () => loadSavedTone(Number(button.dataset.loadTone))));
+    view.querySelectorAll('[data-delete-tone]').forEach((button) => button.addEventListener('click', () => deleteSavedTone(Number(button.dataset.deleteTone))));
+  }
+
+  function renderGearLibrary(view) {
+    view.innerHTML = `
+      <section class="card">
+        <h2>Gear Library</h2>
+        <h3>Guitars</h3>
+        ${gearLibrary.guitars.map((guitar) => `<p><span class="pill">${escapeHtml(guitar.name)}</span> ${escapeHtml(guitar.details)}</p>`).join('')}
+        <h3>Common amps</h3>
+        <p>${gearLibrary.amps.map((amp) => `<span class="pill">${escapeHtml(amp)}</span>`).join('')}</p>
+        <h3>Common pedals</h3>
+        <p>${gearLibrary.pedals.map((pedal) => `<span class="pill">${escapeHtml(pedal)}</span>`).join('')}</p>
+        <h3>Special supported amp: Fender Mustang LT25</h3>
+        <p><b>Type:</b> ${gearLibrary.mustangLt25.type}</p>
+        <p><b>Power:</b> ${gearLibrary.mustangLt25.power}</p>
+        <p><b>Speaker:</b> ${gearLibrary.mustangLt25.speaker}</p>
+        <p>${gearLibrary.mustangLt25.notes}</p>
+      </section>
+    `;
+  }
+
+  function renderAbout(view) {
+    view.innerHTML = `
+      <section class="card">
+        <h2>About</h2>
+        <p><b>Gear names are used for reference only. This app is not affiliated with or endorsed by any gear manufacturer.</b></p>
+        <p>This MVP uses a local tone database and rule-based adaptation.</p>
+        <p>It does not pull real-time internet data yet.</p>
+        <p>It gives estimated settings to help users get close to a tone.</p>
+        <p>Future versions could add online lookup or AI tone research.</p>
+        <p class="small">Live input may require localhost or HTTPS.</p>
+      </section>
+    `;
+  }
+
+  function saveProfile() {
+    try {
+      state.profile = readProfileFromForm();
+      safeSave('songToneProfile', state.profile);
+      state.status = 'Profile saved.';
+      state.error = '';
+      renderShell();
+    } catch (error) {
+      showError(error);
+    }
+  }
+
+  function loadProfile() {
+    try {
+      state.profile = safeLoad('songToneProfile', DEFAULT_PROFILE);
+      state.status = 'Profile loaded.';
+      state.error = '';
+      renderShell();
+    } catch (error) {
+      showError(error);
+    }
+  }
+
+  function resetProfile() {
+    state.profile = { ...DEFAULT_PROFILE };
+    state.status = 'Reset to My Default Gear.';
+    state.error = '';
+    renderShell();
+  }
+
+  function matchTone() {
+    try {
+      const query = {
+        song: byId('songTitle').value.trim(),
+        artist: byId('artist').value.trim(),
+        style: byId('toneStyle').value,
+      };
+      const original = findOriginalTone(query);
+      state.currentMatch = { query, original, adapted: adaptToProfile(original, state.profile, query.style) };
+      state.status = 'Tone matched.';
+      state.error = '';
+      renderShell();
+    } catch (error) {
+      showError(error);
+    }
+  }
+
+  function saveCurrentTone() {
+    try {
+      if (!state.currentMatch) throw new Error('Match a tone before saving.');
+      const nameInput = byId('toneName');
+      const fallbackName = `${state.currentMatch.original.artist} - ${state.currentMatch.original.song}`;
+      const name = nameInput && nameInput.value.trim() ? nameInput.value.trim() : fallbackName;
+      state.savedTones.push({ name, match: clone(state.currentMatch) });
+      safeSave('songToneSavedTones', state.savedTones);
+      state.status = 'Matched tone saved.';
+      state.error = '';
+      renderShell();
+    } catch (error) {
+      showError(error);
+    }
+  }
+
+  function loadSavedTone(index) {
+    const saved = state.savedTones[index];
+    if (!saved) return;
+    state.currentMatch = clone(saved.match);
+    state.tab = 'Song Tone Match';
+    state.status = 'Saved tone loaded.';
+    state.error = '';
+    renderShell();
+  }
+
+  function deleteSavedTone(index) {
+    try {
+      state.savedTones.splice(index, 1);
+      safeSave('songToneSavedTones', state.savedTones);
+      state.status = 'Saved tone deleted.';
+      state.error = '';
+      renderShell();
+    } catch (error) {
+      showError(error);
+    }
+  }
+
+  function findOriginalTone(query) {
+    const song = query.song.toLowerCase();
+    const artist = query.artist.toLowerCase();
+    const exact = songToneDatabase.find((entry) => entry.song.toLowerCase() === song && entry.artist.toLowerCase() === artist);
+    if (exact) return exact;
+    const artistMatch = artist ? songToneDatabase.find((entry) => entry.artist.toLowerCase().includes(artist) || artist.includes(entry.artist.toLowerCase())) : null;
+    if (artistMatch) return { ...artistMatch, song: query.song || artistMatch.song };
+    const styleMatch = songToneDatabase.find((entry) => entry.style.toLowerCase() === query.style.toLowerCase());
+    if (styleMatch) return { ...styleMatch, song: query.song || `${query.style} style tone`, artist: query.artist || 'Estimated' };
+    return songToneDatabase[0];
+  }
+
+  function adaptToProfile(entry, profile, selectedStyle) {
+    const settings = clone(entry.base);
+    const slots = { ...entry.slots };
+    const style = (entry.style || selectedStyle || '').toLowerCase();
+    const pickupType = (profile.pickupType || '').toLowerCase();
+    const amp = (profile.amp || '').toLowerCase();
+    const ownsPedals = Boolean((profile.pedalsOwned || '').trim());
+    const explanation = [];
+    let pickup = 'bridge';
+    let ampModel = style.includes('clean') || style.includes('ambient') || style.includes('worship') ? 'Clean Deluxe' : 'British Crunch';
+
+    if (style.includes('punk')) {
+      settings.gain = Math.max(6, settings.gain);
+      settings.bass = Math.min(5, settings.bass);
+      settings.mids = 7;
+      slots.reverb = 'Low room';
+      pickup = 'bridge';
+      explanation.push('Punk/pop-punk tones need bridge pickup, medium/high gain, tight bass, strong mids, and low/moderate reverb.');
+    }
+    if (style.includes('metal')) {
+      settings.gain = Math.max(8, settings.gain);
+      settings.bass = Math.min(5, settings.bass);
+      slots.stomp = 'Overdrive + Noise Gate';
+      pickup = 'bridge';
+      ampModel = 'Modern Metal';
+      explanation.push('Metal tones need higher gain, a noise gate, tight bass, and a focused bridge-pickup attack.');
+    }
+    if (style.includes('clean') || style.includes('blues') || style.includes('funk') || style.includes('worship')) {
+      settings.gain = Math.min(4, settings.gain);
+      slots.stomp = style.includes('funk') ? 'Compressor' : 'Light compressor';
+      slots.reverb = style.includes('worship') ? 'Large hall' : 'Plate/room';
+      if (slots.modulation === 'None') slots.modulation = style.includes('funk') ? 'Optional auto-wah/chorus' : 'Light chorus';
+      pickup = style.includes('funk') ? 'middle' : 'neck';
+      explanation.push('Clean-style tones reduce gain and use compression/reverb, with chorus or modulation when useful.');
+    }
+    if (style.includes('grunge')) {
+      slots.stomp = 'Distortion/Fuzz';
+      settings.mids = 7;
+      pickup = 'bridge';
+      explanation.push('Grunge tones use distortion/fuzz, more mids, and a less polished response.');
+    }
+    if (style.includes('ambient')) {
+      settings.gain = Math.min(4, settings.gain);
+      slots.delay = 'Long delay';
+      slots.reverb = 'Large hall';
+      slots.modulation = 'Chorus';
+      pickup = 'neck';
+      explanation.push('Ambient tones use a clean amp with delay, reverb, and modulation.');
+    }
+    if (pickupType === 'p90') {
+      settings.mids = Math.min(8, (settings.mids || 6) + 1);
+      settings.treble = Math.max(4, settings.treble - 1);
+      if (settings.gain >= 8 && !slots.stomp.toLowerCase().includes('gate')) slots.stomp += ' + Noise Gate';
+      explanation.push('Your P90 pickup gets extra mids, slightly smoother treble, and a punchy attack; high-gain sounds add gate help.');
+    }
+    if (amp.includes('fender mustang lt25')) {
+      settings.bass = Math.max(3, settings.bass - 1);
+      settings.treble = Math.min(8, settings.treble + 1);
+      settings.gain = Math.min(8, settings.gain);
+      explanation.push('Your Fender Mustang LT25 has a 1x8 speaker, so bass is reduced, treble/clarity is raised, and extreme gain is avoided to reduce fizz.');
+      if (!ownsPedals) explanation.push('Because no external pedals are listed, the recommendation uses LT25 built-in effect slots.');
+    }
+
+    return {
+      ampModel,
+      gain: clamp10(settings.gain),
+      volume: clamp10(settings.volume),
+      treble: clamp10(settings.treble),
+      bass: clamp10(settings.bass),
+      slots,
+      pickup,
+      knobs: style.includes('clean') ? 'Volume 8-10, tone 7-10 for clarity.' : 'Volume 8-10, tone 6-8; roll tone down if the small speaker sounds sharp.',
+      playingTips: style.includes('punk') || style.includes('metal') ? 'Use firm downstrokes, tight palm muting, and bridge pickup attack.' : 'Match the dynamics: lighter picking for cleans, stronger pick attack for leads and crunch.',
+      explanation,
+    };
+  }
+
+  function field(id, label, value) {
+    return `<label>${label}<input id="${id}" value="${escapeHtml(value)}" placeholder="${label}" /></label>`;
+  }
+
+  function slider(label, value) {
+    return `<div class="slider"><span>${label}</span><input type="range" min="0" max="10" value="${value}" disabled /><b>${value}</b></div>`;
+  }
+
+  function readProfileFromForm() {
+    return {
+      guitar: byId('guitar').value,
+      pickupType: byId('pickupType').value,
+      amp: byId('amp').value,
+      speaker: byId('speaker').value,
+      pedalsOwned: byId('pedalsOwned').value,
+      skillLevel: byId('skillLevel').value,
+      notes: byId('notes').value,
+    };
+  }
+
+  function safeLoad(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : clone(fallback);
+    } catch (error) {
+      return clone(fallback);
+    }
+  }
+
+  function safeSave(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      throw new Error('localStorage save failed. Your browser may be blocking local file storage.');
+    }
+  }
+
+  function showError(error) {
+    state.error = error && error.message ? error.message : 'Something went wrong.';
+    state.status = '';
+    renderShell();
+  }
+
+  function byId(id) {
+    return document.getElementById(id);
+  }
+
+  function clone(value) {
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function clamp10(value) {
+    return Math.max(0, Math.min(10, Math.round(Number(value) || 0)));
+  }
+
+  function escapeHtml(value) {
+    return String(value || '').replace(/[&<>"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+}());
 document.addEventListener('DOMContentLoaded',()=>{try{boot()}catch(e){document.getElementById('app').innerHTML=`<h1>Song Tone Match MVP</h1><div class='error'>Startup error: ${e.message}</div>`}})
 function boot(){
 const defaultProfile={guitar:'Benji Madden Signature',pickupType:'P90',amp:'Fender Mustang LT25',speaker:'1x8 combo speaker',pedalsOwned:'',skillLevel:'Beginner',notes:'beginner/home practice setup'}
