@@ -5,6 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ben 10 Omnitrix Simulator</title>
     <style>
+      body{margin:0;font-family:Arial,sans-serif;background:#0b1220;color:#eaf2ff}
+      .app{max-width:900px;margin:0 auto;padding:20px}
+      .panel{margin-top:14px;padding:14px;border:1px solid #2d3a56;border-radius:12px;background:#111929}
+      .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+      select,button{padding:8px 10px;border-radius:8px;border:1px solid #2f3f62;background:#1b2740;color:#fff}
+      ul{margin:0;padding-left:20px}
+    </style>
+  </head>
+  <body>
+    <div id="root">Loading Omnitrix simulator...</div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+      setTimeout(() => {
+        if (window.__OMNITRIX_BOOTED) return
+        const systems={
+          og:{name:'OG Omnitrix',t:18,r:10,m:0.2,aliens:['Heatblast','Four Arms','XLR8','Diamondhead','Wildmutt']},
+          af:{name:'Alien Force Omnitrix',t:25,r:7,m:0.08,aliens:['Swampfire','Humungousaur','Jetray','Big Chill','Chromastone']},
+          ultimatrix:{name:'Ultimatrix',t:30,r:6,m:0.12,aliens:['Ultimate Humungousaur','Ultimate Echo Echo','Ultimate Spidermonkey','Ultimate Big Chill','Ultimate Swampfire']}
+        }
+        let state='ready',time=0,key='og',idx=0,log=['Fallback mode active. React did not boot, but simulator still works.']
+        const root=document.getElementById('root')
+        const draw=()=>{const s=systems[key];root.innerHTML=`<div class="app"><h1>Ben 10 Omnitrix Simulator</h1><div class="panel row"><label>Device <select id="sys">${Object.keys(systems).map(k=>`<option value="${k}" ${k===key?'selected':''}>${systems[k].name}</option>`).join('')}</select></label><label>Alien <select id="alien" ${state!=='ready'?'disabled':''}>${s.aliens.map((a,i)=>`<option value="${i}" ${i===idx?'selected':''}>${a}</option>`).join('')}</select></label><button id="go" ${state!=='ready'?'disabled':''}>Transform</button></div><div class="panel"><p><b>Status:</b> ${state.toUpperCase()} ${state!=='ready'?`(${time}s)`:''}</p><p><b>Selected:</b> ${s.aliens[idx]}</p></div><div class="panel"><h3>Log</h3><ul>${log.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`
+          document.getElementById('sys').onchange=e=>{key=e.target.value;idx=0;state='ready';time=0;draw()}
+          document.getElementById('alien').onchange=e=>{idx=Number(e.target.value)}
+          document.getElementById('go').onclick=()=>transform()
+        }
+        const tick=(n,done)=>{time=n;draw();const tm=setInterval(()=>{time--;draw();if(time<=0){clearInterval(tm);done()}},1000)}
+        const transform=()=>{if(state!=='ready')return;const s=systems[key];const mis=Math.random()<s.m;const pick=mis?Math.floor(Math.random()*s.aliens.length):idx;state='active';log=[`${s.name}: transformed into ${s.aliens[pick]}${mis?' (misfire!)':''}.`,...log].slice(0,8);draw();tick(s.t,()=>{state='recharging';log=[`${s.aliens[pick]} timed out. Recharging...`,...log].slice(0,8);draw();tick(s.r,()=>{state='ready';time=0;log=['Recharge complete.',...log].slice(0,8);draw()})})}
+        draw()
+      },1200)
+    </script>
       body { margin: 0; font-family: Arial, sans-serif; background: #0b1220; color: #eaf2ff; }
       #root, #app { min-height: 100vh; }
       .boot { padding: 20px; }

@@ -10,6 +10,8 @@ const mountNode = document.getElementById('root') || document.getElementById('ap
   return node
 })()
 
+window.__OMNITRIX_BOOTED = true
+
 ReactDOM.createRoot(mountNode).render(
   <React.StrictMode>
     <App />
