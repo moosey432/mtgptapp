@@ -1,1 +1,54 @@
-body{margin:0;background:#121317;color:#e8ebff;font-family:Arial,sans-serif} .app{max-width:1100px;margin:0 auto;padding:16px} .tabs button,.row button,select,input,textarea{margin:4px;padding:8px;border-radius:8px;border:1px solid #32384f;background:#1b2130;color:#fff} .tabs .active{background:#3756d8} .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px} .card,.pedal,.chain,.notice,.error-box{background:#1a1f2c;border:1px solid #2b3655;border-radius:12px;padding:10px;margin-top:8px} .preset-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px} .slider{display:flex;gap:8px;align-items:center} .slider input{flex:1} .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap} .error-box{background:#4a1f2a;border-color:#9b3552} footer{margin-top:16px;opacity:.8;font-size:12px}
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: radial-gradient(circle at top, #182332 0%, #090d15 55%);
+  color: #eaf2ff;
+}
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.subtitle {
+  opacity: 0.85;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.panel {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid #2d3a56;
+  border-radius: 12px;
+  background: #111929;
+}
+
+select,
+button {
+  margin-left: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #2f3f62;
+  background: #1b2740;
+  color: #fff;
+}
+
+.transform-btn {
+  font-weight: 700;
+}
+
+ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+li {
+  margin: 6px 0;
+}
