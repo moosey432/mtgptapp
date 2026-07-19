@@ -1,141 +1,197 @@
 import { useMemo, useState } from 'react'
 import './styles.css'
 
-const omnitrixSystems = {
-  og: {
-    name: 'OG Omnitrix',
-    color: '#57ff71',
-    transformSeconds: 18,
-    rechargeSeconds: 10,
-    randomMisfireChance: 0.2,
-    aliens: [
-      { name: 'Heatblast', role: 'Pyro Blaster' },
-      { name: 'Four Arms', role: 'Heavy Brawler' },
-      { name: 'XLR8', role: 'Speed Runner' },
-      { name: 'Diamondhead', role: 'Crystal Tank' },
-      { name: 'Wildmutt', role: 'Tracker' },
-    ],
-  },
-  af: {
-    name: 'Alien Force Omnitrix',
-    color: '#43e8ff',
-    transformSeconds: 25,
-    rechargeSeconds: 7,
-    randomMisfireChance: 0.08,
-    aliens: [
-      { name: 'Swampfire', role: 'Regenerator' },
-      { name: 'Humungousaur', role: 'Titan Bruiser' },
-      { name: 'Jetray', role: 'Aerial Striker' },
-      { name: 'Big Chill', role: 'Stealth Freezer' },
-      { name: 'Chromastone', role: 'Energy Redirector' },
-    ],
-  },
-  ultimatrix: {
-    name: 'Ultimatrix',
-    color: '#ff5252',
-    transformSeconds: 30,
-    rechargeSeconds: 6,
-    randomMisfireChance: 0.12,
-    aliens: [
-      { name: 'Ultimate Humungousaur', role: 'Cannon Beast' },
-      { name: 'Ultimate Echo Echo', role: 'Sonic Commander' },
-      { name: 'Ultimate Spidermonkey', role: 'Acrobatic Hunter' },
-      { name: 'Ultimate Big Chill', role: 'Absolute Freeze' },
-      { name: 'Ultimate Swampfire', role: 'Napalm Flora' },
-    ],
-  },
-}
+const maxSoul = 100
+const maxMonster = 120
+
+const acts = [
+  { label: 'Check', effect: 'The training dummy looks wobbly. ATK 4 DEF 2. It seems open to kindness.', mercy: 10 },
+  { label: 'Compliment', effect: 'You tell the dummy its stitches are perfectly spooky.', mercy: 22 },
+  { label: 'Joke', effect: 'You share a skeleton pun. The dummy rattles with laughter.', mercy: 18 },
+]
+
+const items = [
+  { label: 'Nice Cream', heal: 28 },
+  { label: 'Butterscotch Pie', heal: 45 },
+  { label: 'Bandage', heal: 18 },
+]
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 
 export default function App() {
-  const [systemKey, setSystemKey] = useState('og')
-  const [selectedAlien, setSelectedAlien] = useState(0)
-  const [state, setState] = useState('ready')
-  const [timeLeft, setTimeLeft] = useState(0)
-  const [log, setLog] = useState(['Omnitrix online. Choose a form and transform.'])
+  const [monsterHp, setMonsterHp] = useState(maxMonster)
+  const [soulHp, setSoulHp] = useState(maxSoul)
+  const [mercy, setMercy] = useState(0)
+  const [inventory, setInventory] = useState(items)
+  const [mode, setMode] = useState('intro')
+  const [defending, setDefending] = useState(false)
+  const [message, setMessage] = useState('* A shy training dummy blocks the way.')
+  const [battleLog, setBattleLog] = useState(['The encounter begins.'])
 
-  const system = useMemo(() => omnitrixSystems[systemKey], [systemKey])
-  const currentAlien = system.aliens[selectedAlien]
+  const battleOver = monsterHp <= 0 || soulHp <= 0 || mode === 'spared'
+  const mercyReady = mercy >= 100
 
-  const addLog = (message) => setLog((prev) => [message, ...prev].slice(0, 8))
+  const monsterMood = useMemo(() => {
+    if (mode === 'spared') return 'spared'
+    if (monsterHp <= 0) return 'defeated'
+    if (mercy >= 75) return 'hopeful'
+    if (mercy >= 40) return 'curious'
+    return 'nervous'
+  }, [mercy, mode, monsterHp])
 
-  const tick = (seconds, onEnd) => {
-    setTimeLeft(seconds)
-    let remaining = seconds
-    const timer = setInterval(() => {
-      remaining -= 1
-      setTimeLeft(remaining)
-      if (remaining <= 0) {
-        clearInterval(timer)
-        onEnd()
+  const addLog = (entry) => setBattleLog((prev) => [entry, ...prev].slice(0, 6))
+
+  const enemyTurn = (setupMessage, isDefending = defending) => {
+    if (battleOver) return
+
+    const incomingDamage = Math.floor(Math.random() * 12) + 8
+    const reducedDamage = isDefending ? Math.floor(incomingDamage * 0.55) : incomingDamage
+
+    setDefending(false)
+    setSoulHp((hp) => {
+      const nextHp = clamp(hp - reducedDamage, 0, maxSoul)
+      if (nextHp <= 0) {
+        setMode('lost')
+        setMessage('* Your SOUL flickers out... Tap RESET to try again.')
+        addLog('You were defeated by the bullet pattern.')
+      } else {
+        setMessage(`${setupMessage} Dodge phase! You take ${reducedDamage} damage.`)
+        addLog(`Dummy attacks for ${reducedDamage} damage.`)
       }
-    }, 1000)
-  }
-
-  const transform = () => {
-    if (state !== 'ready') return
-
-    const misfire = Math.random() < system.randomMisfireChance
-    const finalAlien = misfire
-      ? system.aliens[Math.floor(Math.random() * system.aliens.length)]
-      : currentAlien
-
-    setState('active')
-    addLog(`${system.name}: transformed into ${finalAlien.name}${misfire ? ' (misfire!)' : ''}.`)
-
-    tick(system.transformSeconds, () => {
-      setState('recharging')
-      addLog(`${finalAlien.name} timed out. Omnitrix recharging...`)
-
-      tick(system.rechargeSeconds, () => {
-        setState('ready')
-        setTimeLeft(0)
-        addLog('Recharge complete. Ready for the next transformation.')
-      })
+      return nextHp
     })
   }
 
+  const handleFight = () => {
+    if (battleOver) return
+    const damage = Math.floor(Math.random() * 18) + 14
+    setMonsterHp((hp) => {
+      const nextHp = clamp(hp - damage, 0, maxMonster)
+      if (nextHp <= 0) {
+        setMode('won')
+        setMessage('* You won! The dummy topples over in a dramatic puff of stuffing.')
+        addLog(`You dealt ${damage} damage and won.`)
+      } else {
+        setMessage(`* You swing carefully and deal ${damage} damage.`)
+        addLog(`Fight: ${damage} damage.`)
+        setTimeout(() => enemyTurn('* The dummy wiggles angrily.'), 250)
+      }
+      return nextHp
+    })
+  }
+
+  const handleAct = (act) => {
+    if (battleOver) return
+    setMercy((value) => clamp(value + act.mercy, 0, 100))
+    setMessage(`* ${act.effect}`)
+    addLog(`${act.label}: mercy +${act.mercy}.`)
+    setTimeout(() => enemyTurn('* The dummy sends soft cotton bullets your way.'), 250)
+  }
+
+  const handleItem = (item) => {
+    if (battleOver) return
+    setSoulHp((hp) => clamp(hp + item.heal, 0, maxSoul))
+    setInventory((current) => current.filter((inventoryItem) => inventoryItem.label !== item.label))
+    setMessage(`* You used ${item.label}. You recovered ${item.heal} HP.`)
+    addLog(`${item.label}: healed ${item.heal} HP.`)
+    setTimeout(() => enemyTurn('* The dummy attacks while you snack.'), 250)
+  }
+
+  const handleMercy = () => {
+    if (battleOver) return
+    if (mercyReady) {
+      setMode('spared')
+      setMessage('* You spared the dummy. It waves goodbye with a tiny felt hand.')
+      addLog('Mercy accepted. Encounter ended peacefully.')
+      return
+    }
+
+    setDefending(true)
+    setMessage('* You chose MERCY, but the dummy is not ready. Your guard rises for the next attack.')
+    addLog('Mercy failed. Guard up for reduced damage.')
+    setTimeout(() => enemyTurn('* The dummy hesitates before attacking.', true), 250)
+  }
+
+  const resetBattle = () => {
+    setMonsterHp(maxMonster)
+    setSoulHp(maxSoul)
+    setMercy(0)
+    setInventory(items)
+    setMode('intro')
+    setDefending(false)
+    setMessage('* A shy training dummy blocks the way.')
+    setBattleLog(['The encounter begins.'])
+  }
+
   return (
-    <div className="app">
-      <h1>Ben 10 Omnitrix Simulator</h1>
-      <p className="subtitle">Play with the OG Omnitrix, Alien Force Omnitrix, and Ultimatrix.</p>
+    <main className="game-shell">
+      <section className="battle-card" aria-label="Monster battle">
+        <div className={`monster ${monsterMood}`} aria-hidden="true">
+          <div className="monster-face">
+            <span className="eye" />
+            <span className="eye" />
+            <span className="mouth" />
+          </div>
+        </div>
 
-      <div className="panel row">
-        <label>
-          Device
-          <select value={systemKey} onChange={(e) => { setSystemKey(e.target.value); setSelectedAlien(0); setState('ready'); setTimeLeft(0) }}>
-            <option value="og">OG Omnitrix</option>
-            <option value="af">Alien Force Omnitrix</option>
-            <option value="ultimatrix">Ultimatrix</option>
-          </select>
-        </label>
+        <div className="monster-info">
+          <h1>Pocket Soul Battle</h1>
+          <p>Training Dummy</p>
+          <div className="meter" aria-label={`Monster health ${monsterHp} out of ${maxMonster}`}>
+            <span style={{ width: `${(monsterHp / maxMonster) * 100}%` }} />
+          </div>
+        </div>
 
-        <label>
-          Alien Form
-          <select value={selectedAlien} onChange={(e) => setSelectedAlien(Number(e.target.value))} disabled={state !== 'ready'}>
-            {system.aliens.map((alien, idx) => (
-              <option key={alien.name} value={idx}>{alien.name}</option>
-            ))}
-          </select>
-        </label>
+        <div className="dialogue-box" role="status">{message}</div>
 
-        <button className="transform-btn" style={{ borderColor: system.color }} onClick={transform} disabled={state !== 'ready'}>
-          Transform
-        </button>
-      </div>
+        <div className="soul-arena" aria-label="Dodge arena">
+          <button className="move-pad up" aria-label="Move soul up">▲</button>
+          <button className="move-pad left" aria-label="Move soul left">◀</button>
+          <div className="soul">♥</div>
+          <button className="move-pad right" aria-label="Move soul right">▶</button>
+          <button className="move-pad down" aria-label="Move soul down">▼</button>
+          <span className="bullet bullet-one" />
+          <span className="bullet bullet-two" />
+          <span className="bullet bullet-three" />
+        </div>
 
-      <div className="panel">
-        <h2 style={{ color: system.color }}>{system.name}</h2>
-        <p><strong>Selected:</strong> {currentAlien.name} — {currentAlien.role}</p>
-        <p><strong>Status:</strong> {state.toUpperCase()} {state !== 'ready' ? `(${timeLeft}s)` : ''}</p>
-        <p>Transform Duration: {system.transformSeconds}s | Recharge: {system.rechargeSeconds}s</p>
-      </div>
+        <div className="player-stats">
+          <strong>SOUL</strong>
+          <div className="meter hp" aria-label={`Soul health ${soulHp} out of ${maxSoul}`}>
+            <span style={{ width: `${(soulHp / maxSoul) * 100}%` }} />
+          </div>
+          <span>{soulHp}/{maxSoul} HP</span>
+          <span>MERCY {mercy}%</span>
+        </div>
 
-      <div className="panel">
-        <h3>Battle Log</h3>
+        <nav className="battle-actions" aria-label="Battle commands">
+          <button onClick={handleFight} disabled={battleOver}>FIGHT</button>
+          <div className="action-menu">
+            <button disabled={battleOver}>ACT</button>
+            <div className="submenu">
+              {acts.map((act) => <button key={act.label} onClick={() => handleAct(act)}>{act.label}</button>)}
+            </div>
+          </div>
+          <div className="action-menu">
+            <button disabled={battleOver || inventory.length === 0}>ITEM</button>
+            <div className="submenu">
+              {inventory.length > 0
+                ? inventory.map((item) => <button key={item.label} onClick={() => handleItem(item)}>{item.label}</button>)
+                : <span>No items left</span>}
+            </div>
+          </div>
+          <button className={mercyReady ? 'mercy-ready' : ''} onClick={handleMercy} disabled={battleOver}>MERCY</button>
+        </nav>
+
+        <button className="reset-button" onClick={resetBattle}>RESET</button>
+      </section>
+
+      <aside className="log-panel">
+        <h2>Battle Log</h2>
         <ul>
-          {log.map((entry, idx) => <li key={`${entry}-${idx}`}>{entry}</li>)}
+          {battleLog.map((entry, index) => <li key={`${entry}-${index}`}>{entry}</li>)}
         </ul>
-      </div>
-    </div>
+      </aside>
+    </main>
   )
 }
