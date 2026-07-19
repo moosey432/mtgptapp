@@ -1,54 +1,293 @@
+:root {
+  color: #fff8df;
+  background: #060606;
+  font-family: 'Courier New', Courier, monospace;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: radial-gradient(circle at top, #182332 0%, #090d15 55%);
-  color: #eaf2ff;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 214, 82, 0.2), transparent 28rem),
+    linear-gradient(180deg, #101010 0%, #020202 100%);
 }
 
-.app {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.subtitle {
-  opacity: 0.85;
-}
-
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: flex-end;
-}
-
-.panel {
-  margin-top: 14px;
-  padding: 14px;
-  border: 1px solid #2d3a56;
-  border-radius: 12px;
-  background: #111929;
-}
-
-select,
 button {
-  margin-left: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid #2f3f62;
-  background: #1b2740;
-  color: #fff;
+  min-height: 46px;
+  border: 3px solid #ff9f1c;
+  border-radius: 0;
+  background: #080808;
+  color: #ffcf66;
+  font: 700 1rem 'Courier New', Courier, monospace;
+  letter-spacing: 0.04em;
+  touch-action: manipulation;
 }
 
-.transform-btn {
-  font-weight: 700;
+button:active:not(:disabled),
+button:focus-visible {
+  background: #ff9f1c;
+  color: #090909;
+  outline: 2px solid #fff8df;
+  outline-offset: 2px;
 }
 
-ul {
+button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+.game-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 720px) minmax(220px, 320px);
+  gap: 1rem;
+  width: min(1120px, 100%);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: clamp(0.75rem, 3vw, 1.5rem);
+}
+
+.battle-card,
+.log-panel {
+  border: 4px solid #fff8df;
+  background: rgba(0, 0, 0, 0.88);
+  box-shadow: 0 0 0 4px #111, 0 0 2rem rgba(255, 159, 28, 0.18);
+}
+
+.battle-card {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(0.8rem, 3vw, 1.25rem);
+}
+
+.monster {
+  display: grid;
+  place-items: center;
+  width: min(44vw, 180px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+  border: 4px solid #fff8df;
+  border-radius: 46% 46% 40% 40%;
+  background: linear-gradient(150deg, #cfcfcf, #747474);
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.monster.curious { transform: rotate(-2deg); }
+.monster.hopeful { filter: drop-shadow(0 0 1rem #8dff8d); }
+.monster.spared { filter: drop-shadow(0 0 1.6rem #f7ff6a); }
+.monster.defeated { opacity: 0.45; transform: rotate(8deg); }
+
+.monster-face {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.2rem;
+  width: 58%;
+}
+
+.eye,
+.mouth {
+  display: block;
+  background: #050505;
+}
+
+.eye {
+  width: 1.35rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.mouth {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: 3.2rem;
+  height: 0.55rem;
+  border-radius: 999px;
+}
+
+.monster-info {
+  text-align: center;
+}
+
+.monster-info h1,
+.log-panel h2 {
+  margin: 0 0 0.25rem;
+  color: #ffcf66;
+  font-size: clamp(1.45rem, 7vw, 2.4rem);
+}
+
+.monster-info p {
+  margin: 0.25rem 0 0.8rem;
+}
+
+.meter {
+  overflow: hidden;
+  width: 100%;
+  height: 1rem;
+  border: 2px solid #fff8df;
+  background: #2a1010;
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #ff3b30, #ffcf66);
+  transition: width 220ms ease;
+}
+
+.meter.hp span {
+  background: linear-gradient(90deg, #ff2255, #ff6a88);
+}
+
+.dialogue-box {
+  min-height: 5.5rem;
+  padding: 1rem;
+  border: 4px solid #fff8df;
+  font-size: clamp(1rem, 4vw, 1.2rem);
+  line-height: 1.45;
+}
+
+.soul-arena {
+  position: relative;
+  display: grid;
+  grid-template-areas:
+    '. up .'
+    'left soul right'
+    '. down .';
+  place-items: center;
+  min-height: 210px;
+  border: 4px solid #fff8df;
+  background: #080808;
+  overflow: hidden;
+}
+
+.soul {
+  grid-area: soul;
+  color: #ff2255;
+  font-size: 2.25rem;
+  z-index: 2;
+  text-shadow: 0 0 1rem #ff2255;
+}
+
+.move-pad {
+  z-index: 3;
+  width: 58px;
+  height: 58px;
+  border-color: #fff8df;
+  color: #fff8df;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.up { grid-area: up; }
+.left { grid-area: left; }
+.right { grid-area: right; }
+.down { grid-area: down; }
+
+.bullet {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #6ee7ff;
+  border-radius: 50%;
+  animation: drift 3.4s linear infinite;
+}
+
+.bullet-one { top: 24%; left: 12%; }
+.bullet-two { top: 58%; left: 78%; animation-delay: -1.2s; }
+.bullet-three { top: 72%; left: 24%; animation-delay: -2.2s; }
+
+@keyframes drift {
+  50% { transform: translate(42px, -26px) scale(1.2); }
+}
+
+.player-stats {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.battle-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.65rem;
+}
+
+.action-menu {
+  position: relative;
+}
+
+.action-menu > button {
+  width: 100%;
+}
+
+.submenu {
+  position: absolute;
+  inset: auto 0 calc(100% + 0.35rem) 0;
+  display: none;
+  grid-template-columns: 1fr;
+  gap: 0.35rem;
+  padding: 0.45rem;
+  border: 3px solid #fff8df;
+  background: #050505;
+  z-index: 10;
+}
+
+.action-menu:focus-within .submenu,
+.action-menu:hover .submenu {
+  display: grid;
+}
+
+.mercy-ready {
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% { box-shadow: 0 0 1rem #f7ff6a; }
+}
+
+.reset-button {
+  justify-self: center;
+  width: min(240px, 100%);
+}
+
+.log-panel {
+  padding: 1rem;
+}
+
+.log-panel ul {
   margin: 0;
-  padding-left: 20px;
+  padding-left: 1.2rem;
+  line-height: 1.55;
 }
 
-li {
-  margin: 6px 0;
+@media (max-width: 760px) {
+  .game-shell {
+    grid-template-columns: 1fr;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  }
+
+  .battle-actions {
+    position: sticky;
+    bottom: 0.5rem;
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0.5rem;
+    border: 3px solid #fff8df;
+    background: #050505;
+    z-index: 20;
+  }
+
+  .submenu {
+    inset: auto 0 calc(100% + 0.25rem) 0;
+  }
+
+  .player-stats {
+    grid-template-columns: auto 1fr;
+  }
 }
